@@ -2970,14 +2970,12 @@ function readiness() {
 const mistakes = () => QS.filter(q => { const s = pstore.stats[q.id]; return s && s.h && s.h[s.h.length - 1] === 0; });
 function renderHome() {
   const rd = readiness(), mk = mistakes().length;
-  const quick = [["sg-scrum-team", "Scrum Team"], ["sg-scrum-events", "Events"], ["sg-sprint-planning", "Sprint Planning"], ["sg-daily-scrum", "Daily Scrum"], ["sg-scrum-artifacts", "Artifacts"], ["sg-commitment-definition-of-done", "Definition of Done"], ["sg-scrum-master", "Scrum Master"]];
   const saved = loadGame(); const canResume = saved && !saved.done && (saved.pos > 0 || saved.sp > 0);
   $("v-home").innerHTML = `<div class="wrap home">
     <div class="entries">
       <section class="entry guide-entry" aria-labelledby="h-guide">
         <h2 id="h-guide">${ICON.book}Scrum Guide 2020</h2>
         <form class="bigsearch" id="homeSearch" role="search">${ICON.search}<input id="hq" type="search" placeholder="Search the Scrum Guide" aria-label="Search the Scrum Guide" autocomplete="off"><button class="primary" type="submit"><span>Search</span>${ICON.search.replace('aria-hidden="true"', 'aria-hidden="true" style="width:16px;height:16px"')}</button></form>
-        <div class="chips">${quick.map(([id, n]) => `<a class="chip" href="#guide/${id}">${esc(n)}</a>`).join("")}</div>
         <div class="facts">${[["sg-scrum-team", "3", "accountabilities", "Scrum Master, Product Owner, Developers"], ["sg-scrum-events", "5", "events", "Sprint, Planning, Daily, Review, Retro"], ["sg-scrum-artifacts", "3", "artifacts", "each with its commitment"], ["sg-scrum-values", "5", "values", "Commitment, Focus, Openness, Respect, Courage"]].map(([id, n, k, d]) => `<a class="fact" href="#guide/${id}"><b>${n}</b><span>${k}</span></a>`).join("")}</div>
         <div class="row"><a class="primary" href="#guide" data-lang-go="en">Read in English</a><a class="primary alt" href="#guide" data-lang-go="de" lang="de">Auf Deutsch lesen</a></div>
       </section>
