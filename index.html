@@ -696,6 +696,10 @@ a.primary { text-decoration: none; }
   .qnav .primary { order: -1; flex: 1 1 100%; }
   .qnav .pbtn { flex: 1 1 auto; }
 }
+.entry.guide-entry { align-content: center; gap: 22px; }
+.entry.guide-entry h2 { font-size: clamp(30px, 3.6vw, 44px); }
+.guide-entry .bigsearch input { font-size: 18px; padding-block: 8px; }
+@media (max-width: 960px) { .entry.guide-entry { align-content: start; gap: 14px; } }
 
 </style>
 </head>
@@ -1079,11 +1083,11 @@ const Q = {
   select: ["Through discussion with the Product Owner, the Developers select items from the Product Backlog to include in the current Sprint.", "Sprint Planning"],
   forecast: ["However, the more the Developers know about their past performance, their upcoming capacity, and their Definition of Done, the more confident they will be in their Sprint forecasts.", "Sprint Planning"],
   invite: ["The Scrum Team may also invite other people to attend Sprint Planning to provide advice.", "Sprint Planning"],
-  selfMgmt: ["They are also self-managing, meaning they internally decide who does what, when, and how.", "The Scrum Team"],
+  selfMgmt: ["They are also self-managing, meaning they internally decide who does what, when, and how.", "Scrum Team"],
   howDev: ["How this is done is at the sole discretion of the Developers. No one else tells them how to turn Product Backlog items into Increments of value.", "Sprint Planning"],
-  convince: ["Those wanting to change the Product Backlog can do so by trying to convince the Product Owner.", "The Product Owner"],
-  order: ["Ordering Product Backlog items", "The Product Owner"],
-  respect: ["For Product Owners to succeed, the entire organization must respect their decisions.", "The Product Owner"],
+  convince: ["Those wanting to change the Product Backlog can do so by trying to convince the Product Owner.", "Product Owner"],
+  order: ["Ordering Product Backlog items", "Product Owner"],
+  respect: ["For Product Owners to succeed, the entire organization must respect their decisions.", "Product Owner"],
   daily: ["The Daily Scrum is a 15-minute event for the Developers of the Scrum Team.", "Daily Scrum"],
   sbPlan: ["The Sprint Backlog is a plan by and for the Developers.", "Sprint Backlog"],
   quality: ["Quality does not decrease", "The Sprint"],
@@ -1091,8 +1095,8 @@ const Q = {
   negotiate: ["If the work turns out to be different than they expected, they collaborate with the Product Owner to negotiate the scope of the Sprint Backlog within the Sprint without affecting the Sprint Goal.", "Commitment: Sprint Goal"],
   notDone: ["If a Product Backlog item does not meet the Definition of Done, it cannot be released or even presented at the Sprint Review. Instead, it returns to the Product Backlog for future consideration.", "Commitment: Definition of Done"],
   incDoD: ["Work cannot be considered part of an Increment unless it meets the Definition of Done.", "Increment"],
-  timebox: ["Ensuring that all Scrum events take place and are positive, productive, and kept within the timebox.", "The Scrum Master"],
-  coach: ["Coaching the team members in self-management and cross-functionality", "The Scrum Master"],
+  timebox: ["Ensuring that all Scrum events take place and are positive, productive, and kept within the timebox.", "Scrum Master"],
+  coach: ["Coaching the team members in self-management and cross-functionality", "Scrum Master"],
   retroImp: ["The Scrum Team identifies the most helpful changes to improve its effectiveness. The most impactful improvements are addressed as soon as possible. They may even be added to the Sprint Backlog for the next Sprint.", "Sprint Retrospective"],
   retroScope: ["The Scrum Team inspects how the last Sprint went with regards to individuals, interactions, processes, tools, and their Definition of Done.", "Sprint Retrospective"],
   review: ["The Sprint Review is a working session and the Scrum Team should avoid limiting it to a presentation.", "Sprint Review"]
@@ -1266,7 +1270,7 @@ const S1 = {
         { t: "Leave it with Priya. The Developers are self-managing.", g: 0, fb: "Self-management doesn't mean leaving the team alone with an impediment they can't remove. They already tried twice.", fx: S => { S.items.form.blocked = 5; S.flags.itSlow = true; } },
         { t: "Put it on the agenda for the Sprint Retrospective.", g: 0, fb: "The Retrospective is too late for this Sprint. When something goes off track, the adjustment should be made as soon as possible.", fx: S => { S.items.form.blocked = 5; S.flags.itSlow = true; } }
       ],
-      g: [["Causing the removal of impediments to the Scrum Team’s progress", "The Scrum Master"], ["The adjustment must be made as soon as possible to minimize further deviation.", "Adaptation"]],
+      g: [["Causing the removal of impediments to the Scrum Team’s progress", "Scrum Master"], ["The adjustment must be made as soon as possible to minimize further deviation.", "Adaptation"]],
       then: S => S.items.form.blocked === 1 ? [["you", "IT will set up the access tonight."], ["priya", "Brilliant. I'll work on something else until then."]] : [["priya", "Okay. I'll work on something else meanwhile and keep chasing IT."]] },
 
     day(5),
@@ -1284,7 +1288,7 @@ const S1 = {
         { t: "Tell Hans, in front of the team, that managers have no say in Scrum.", g: 1, fb: "Stopping it was right, but stakeholders do have a say, at the Sprint Review and through the Product Owner. And respect is a Scrum value; coaching Hans works better than embarrassing him." },
         { t: "Ask Tom to do what Hans says. Hans is the head of department.", g: 0, fb: "Hans is outside the Scrum Team. Scrum Teams are self-managing and decide internally who does what; his job title doesn't change that.", fx: S => { const [a, b] = S.hans; S.on.tom = b; S.items[a].owner = null; S.lost.tom = [5]; S.flags.hansMoved = true; note(S, `Tom moved to “${N(S, b)}”`, "Decided by Hans, not the Developers", "plan"); } }
       ],
-      g: [Q.selfMgmt, ["They are structured and empowered by the organization to manage their own work.", "The Scrum Team"], ["Removing barriers between stakeholders and Scrum Teams.", "The Scrum Master"]],
+      g: [Q.selfMgmt, ["They are structured and empowered by the organization to manage their own work.", "Scrum Team"], ["Removing barriers between stakeholders and Scrum Teams.", "Scrum Master"]],
       then: S => S.flags.hansMoved ? [["tom", "Fine. Switching now."]] : [["hans", "Hm. All right, I'll come to the Review, then."]] },
 
     day(6),
@@ -1404,7 +1408,7 @@ const S1 = {
         { t: "“Sure. The Developers can speak more freely without you.”", g: 0, fb: "The Retrospective belongs to the whole Scrum Team: one Scrum Master, one Product Owner and the Developers. There are no sub-teams within a Scrum Team." },
         { t: "“Come for the first half, then you can go.”", g: 1, fb: "Half is better than nothing, but the Product Owner is a full member of the Scrum Team that inspects the Sprint." }
       ],
-      g: [Q.retroScope, ["The Scrum Team consists of one Scrum Master, one Product Owner, and Developers.", "The Scrum Team"]] },
+      g: [Q.retroScope, ["The Scrum Team consists of one Scrum Master, one Product Owner, and Developers.", "Scrum Team"]] },
 
     { k: "retro", t: "15:00", at: "lounge", cast: TEAM, label: "Retro improvement",
       lines: S => {
@@ -1612,7 +1616,7 @@ const S2 = {
         { t: "Agree. Hans is busy, and an email is more efficient.", g: 0, fb: "An email can't replace the stakeholders and the Scrum Team inspecting the Increment together and adapting the Product Backlog." },
         { t: "Tell him stakeholders are required to attend by Scrum's rules.", g: 0, fb: "Quoting rules won't win Hans over. The Review only works when key stakeholders take part, so help him see its value." }
       ],
-      g: [Q.review, ["Helping employees and stakeholders understand and enact an empirical approach for complex work", "The Scrum Master"]],
+      g: [Q.review, ["Helping employees and stakeholders understand and enact an empirical approach for complex work", "Scrum Master"]],
       post: S => closeSprint(S) },
 
     { k: "say", t: "11:20", at: "workshop", cast: ALL,
@@ -1676,7 +1680,7 @@ const S3 = {
         { t: "Yes: two teams, each with its own Product Owner and Product Backlog.", g: 0, fb: "Teams working on the same product should share the same Product Goal, Product Backlog and Product Owner. Two backlogs would split one product in two." },
         { t: "Keep one team of eleven, with a lead developer to coordinate.", g: 0, fb: "A Scrum Team is typically 10 or fewer people, and within it there are no sub-teams or hierarchies, so no lead developer either." }
       ],
-      g: [["If Scrum Teams become too large, they should consider reorganizing into multiple cohesive Scrum Teams, each focused on the same product. Therefore, they should share the same Product Goal, Product Backlog, and Product Owner.", "The Scrum Team"], ["The Scrum Team is small enough to remain nimble and large enough to complete significant work within a Sprint, typically 10 or fewer people.", "The Scrum Team"]] },
+      g: [["If Scrum Teams become too large, they should consider reorganizing into multiple cohesive Scrum Teams, each focused on the same product. Therefore, they should share the same Product Goal, Product Backlog, and Product Owner.", "Scrum Team"], ["The Scrum Team is small enough to remain nimble and large enough to complete significant work within a Sprint, typically 10 or fewer people.", "Scrum Team"]] },
 
     { k: "who", t: "08:45", at: "hans", cast: ["hans", "you"], label: "One Definition of Done for two teams",
       lines: [["hans", "And with two teams, does each team keep its own Definition of Done?"]],
@@ -1759,7 +1763,7 @@ const S3 = {
       ok: true,
       allowFb: "Right to let it happen. Self-managing teams decide internally who does what, when and how. Nobody needs to hand Priya her next task.",
       stepFb: "That was healthy self-management. The Developers decide who does what; there was nothing to fix.",
-      g: [["Scrum Teams are cross-functional, meaning the members have all the skills necessary to create value each Sprint. They are also self-managing, meaning they internally decide who does what, when, and how.", "The Scrum Team"]] },
+      g: [["Scrum Teams are cross-functional, meaning the members have all the skills necessary to create value each Sprint. They are also self-managing, meaning they internally decide who does what, when, and how.", "Scrum Team"]] },
 
     day(6),
 
@@ -1807,7 +1811,7 @@ const S3 = {
       q: "Who is accountable for developing and explicitly communicating the Product Goal?",
       ans: "po",
       fb: S => S.pgoalDone ? "Developing and communicating the Product Goal is part of the Product Owner's Product Backlog management. A team fulfils (or abandons) one Product Goal before taking on the next, and this one is fulfilled." : "Developing and communicating the Product Goal is part of the Product Owner's Product Backlog management. The team keeps working toward it until it is fulfilled (or abandoned).",
-      g: [["Developing and explicitly communicating the Product Goal", "The Product Owner"], ["The Product Goal is the long-term objective for the Scrum Team. They must fulfill (or abandon) one objective before taking on the next.", "Commitment: Product Goal"]],
+      g: [["Developing and explicitly communicating the Product Goal", "Product Owner"], ["The Product Goal is the long-term objective for the Scrum Team. They must fulfill (or abandon) one objective before taking on the next.", "Commitment: Product Goal"]],
       then: S => S.pgoalDone ? [["jonas", "Here's my proposal for the next Product Goal: returning customers manage their bikes and bookings in one account."]] : [["jonas", "Yes. We keep going: the Product Goal still matters to customers."]],
       post: S => { if (S.pgoalDone) { S.pgoal = NEXT_PRODUCT_GOAL; note(S, "New Product Goal in the Product Backlog", "Developed and communicated by Jonas", "goal"); } } },
 
@@ -1869,34 +1873,34 @@ const EVENTS = {
 
 // ----- "Who decides?" rapid round. Answers: po, dev, sm, team -----
 const BLITZ = [
-  ["Orders the Product Backlog items", "po", "Ordering Product Backlog items", "The Product Owner"],
-  ["Develops and explicitly communicates the Product Goal", "po", "Developing and explicitly communicating the Product Goal", "The Product Owner"],
-  ["Is accountable for maximizing the value of the product", "po", "The Product Owner is accountable for maximizing the value of the product resulting from the work of the Scrum Team.", "The Product Owner"],
-  ["Has the authority to cancel a Sprint", "po", "Only the Product Owner has the authority to cancel the Sprint.", "The Sprint"],
-  ["Proposes how the product could increase its value in the current Sprint", "po", "The Product Owner proposes how the product could increase its value and utility in the current Sprint.", "Sprint Planning"],
-  ["Stays accountable even when Product Backlog work is delegated", "po", "The Product Owner may do the above work or may delegate the responsibility to others. Regardless, the Product Owner remains accountable.", "The Product Owner"],
-  ["Is responsible for sizing Product Backlog items", "dev", "The Developers who will be doing the work are responsible for the sizing.", "Product Backlog"],
-  ["Is accountable for creating a plan for the Sprint, the Sprint Backlog", "dev", "Creating a plan for the Sprint, the Sprint Backlog", "Developers"],
-  ["Selects items for the Sprint, through discussion with the Product Owner", "dev", "Through discussion with the Product Owner, the Developers select items from the Product Backlog to include in the current Sprint.", "Sprint Planning"],
-  ["Decides how to turn Product Backlog items into Increments", "dev", "How this is done is at the sole discretion of the Developers.", "Sprint Planning"],
-  ["Holds each other accountable as professionals", "dev", "Holding each other accountable as professionals", "Developers"],
-  ["The Daily Scrum is an event for them", "dev", "The Daily Scrum is a 15-minute event for the Developers of the Scrum Team.", "Daily Scrum"],
-  ["The Sprint Goal is a commitment by them", "dev", "Although the Sprint Goal is a commitment by the Developers, it provides flexibility in terms of the exact work needed to achieve it.", "Commitment: Sprint Goal"],
-  ["Is required to conform to the Definition of Done", "dev", "The Developers are required to conform to the Definition of Done.", "Commitment: Definition of Done"],
-  ["Adapts their plan each day toward the Sprint Goal", "dev", "Adapting their plan each day toward the Sprint Goal", "Developers"],
-  ["Collaborates to define the Sprint Goal", "team", "The whole Scrum Team then collaborates to define a Sprint Goal that communicates why the Sprint is valuable to stakeholders.", "Sprint Planning"],
-  ["Is accountable for creating a valuable, useful Increment every Sprint", "team", "The entire Scrum Team is accountable for creating a valuable, useful Increment every Sprint.", "The Scrum Team"],
-  ["Creates the Definition of Done when there is no organizational standard", "team", "If it is not an organizational standard, the Scrum Team must create a Definition of Done appropriate for the product.", "Commitment: Definition of Done"],
-  ["Is responsible for all product-related activities, from stakeholder collaboration to maintenance", "team", "The Scrum Team is responsible for all product-related activities from stakeholder collaboration, verification, maintenance, operation, experimentation, research and development, and anything else that might be required.", "The Scrum Team"],
-  ["Inspects how the last Sprint went, at the Sprint Retrospective", "team", "The Scrum Team inspects how the last Sprint went with regards to individuals, interactions, processes, tools, and their Definition of Done.", "Sprint Retrospective"],
-  ["Is accountable for the Scrum Team's effectiveness", "sm", "The Scrum Master is accountable for the Scrum Team’s effectiveness.", "The Scrum Master"],
-  ["Causes the removal of impediments to the team's progress", "sm", "Causing the removal of impediments to the Scrum Team’s progress", "The Scrum Master"],
-  ["Ensures all Scrum events take place and are kept within the timebox", "sm", "Ensuring that all Scrum events take place and are positive, productive, and kept within the timebox.", "The Scrum Master"],
-  ["Coaches the team members in self-management and cross-functionality", "sm", "Coaching the team members in self-management and cross-functionality", "The Scrum Master"],
-  ["Is accountable for establishing Scrum as defined in the Scrum Guide", "sm", "The Scrum Master is accountable for establishing Scrum as defined in the Scrum Guide.", "The Scrum Master"],
-  ["Facilitates stakeholder collaboration as requested or needed", "sm", "Facilitating stakeholder collaboration as requested or needed.", "The Scrum Master"],
-  ["Removes barriers between stakeholders and Scrum Teams", "sm", "Removing barriers between stakeholders and Scrum Teams.", "The Scrum Master"],
-  ["Helps find techniques for effective Product Goal definition and Product Backlog management", "sm", "Helping find techniques for effective Product Goal definition and Product Backlog management", "The Scrum Master"]
+  ["Accountable for ordering the Product Backlog items", "po", "Ordering Product Backlog items", "Product Owner", "Others, including Developers, may do the ordering if the Product Owner delegates it, but the Product Owner stays accountable for it."],
+  ["Developing and explicitly communicating the Product Goal", "po", "Developing and explicitly communicating the Product Goal", "Product Owner", "The Scrum Master only helps find techniques for defining the Product Goal. Developing and communicating it is part of the Product Owner's accountability for Product Backlog management (the work may be delegated)."],
+  ["Accountable for maximizing the value of the product", "po", "The Product Owner is accountable for maximizing the value of the product resulting from the work of the Scrum Team.", "Product Owner", "Easy to mix up: the whole Scrum Team is accountable for a valuable, useful Increment each Sprint, but maximizing the product's value is the Product Owner's accountability."],
+  ["The authority to cancel a Sprint", "po", "Only the Product Owner has the authority to cancel the Sprint.", "The Sprint", "Not management, not the Scrum Master, not the Developers. A Sprint could be cancelled if the Sprint Goal becomes obsolete."],
+  ["In Sprint Planning: proposing how the product could increase its value in the current Sprint", "po", "The Product Owner proposes how the product could increase its value and utility in the current Sprint.", "Sprint Planning", "The proposal comes from the Product Owner. After that, the whole Scrum Team works together to define the Sprint Goal."],
+  ["Remaining accountable for effective Product Backlog management even when others do that work", "po", "The Product Owner may do the above work or may delegate the responsibility to others. Regardless, the Product Owner remains accountable.", "Product Owner", "Delegating the work never moves the accountability. The people doing the delegated work are not accountable for it."],
+  ["Responsible for sizing Product Backlog items", "dev", "The Developers who will be doing the work are responsible for the sizing.", "Product Backlog", "Not the Product Owner. The Product Owner may influence the Developers by helping them understand and select trade-offs."],
+  ["Accountable for creating a plan for the Sprint, the Sprint Backlog", "dev", "Creating a plan for the Sprint, the Sprint Backlog", "Developers", "The trap: Sprint Planning as a whole is collaborative work of the entire Scrum Team, but the Sprint Backlog is a plan by and for the Developers, and creating it is their accountability."],
+  ["Selecting the Product Backlog items for the Sprint, through discussion with the Product Owner", "dev", "Through discussion with the Product Owner, the Developers select items from the Product Backlog to include in the current Sprint.", "Sprint Planning", "The Product Owner discusses and clarifies, but does not pick the items for the Developers."],
+  ["Deciding how the selected work becomes a Done Increment", "dev", "No one else tells them how to turn Product Backlog items into Increments of value.", "Sprint Planning", "No one tells the Developers how to turn Product Backlog items into Increments, not the Product Owner and not the Scrum Master."],
+  ["Holding each other accountable as professionals", "dev", "Holding each other accountable as professionals", "Developers", "The Guide lists this among the Developers' accountabilities, next to creating the Sprint Backlog, following the Definition of Done and adapting their plan each day."],
+  ["The Daily Scrum is a 15-minute event for…", "dev", "The Daily Scrum is a 15-minute event for the Developers of the Scrum Team.", "Daily Scrum", "The Daily Scrum is for the Developers. If the Product Owner or Scrum Master is actively working on Sprint Backlog items, they participate as Developers."],
+  ["The Guide calls the Sprint Goal a commitment by…", "dev", "Although the Sprint Goal is a commitment by the Developers, it provides flexibility in terms of the exact work needed to achieve it.", "Commitment: Sprint Goal", "The trap: the whole Scrum Team defines the Sprint Goal, but the Guide calls it a commitment by the Developers."],
+  ["Required to conform to the Definition of Done while doing the work", "dev", "The Developers are required to conform to the Definition of Done.", "Commitment: Definition of Done", "When the Definition of Done is an organizational standard, all Scrum Teams must follow it as a minimum, but the Guide places the specific requirement to conform to it on the Developers."],
+  ["Adapting the plan each day toward the Sprint Goal", "dev", "Adapting their plan each day toward the Sprint Goal", "Developers", "The Sprint Backlog is a plan by and for the Developers, so adapting it each day is their accountability."],
+  ["In Sprint Planning: defining the Sprint Goal", "team", "The whole Scrum Team then collaborates to define a Sprint Goal that communicates why the Sprint is valuable to stakeholders.", "Sprint Planning", "Not the Product Owner alone: the Product Owner proposes how to increase value, then the whole Scrum Team defines the Sprint Goal together."],
+  ["Accountable for creating a valuable, useful Increment every Sprint", "team", "The entire Scrum Team is accountable for creating a valuable, useful Increment every Sprint.", "Scrum Team", "Not only the Developers: the entire Scrum Team holds this accountability, even though the Developers create the Increment."],
+  ["Creating the Definition of Done when the organization has no standard one", "team", "If it is not an organizational standard, the Scrum Team must create a Definition of Done appropriate for the product.", "Commitment: Definition of Done", "Not the Developers alone and not the Scrum Master: when there's no organizational standard, the Scrum Team creates it."],
+  ["Responsible for all product-related activities, from stakeholder collaboration to maintenance and operation", "team", "The Scrum Team is responsible for all product-related activities from stakeholder collaboration, verification, maintenance, operation, experimentation, research and development, and anything else that might be required.", "Scrum Team", "The Scrum Team is cross-functional and self-managing, so the Guide gives all product-related activities to the whole team."],
+  ["At the Sprint Retrospective: inspecting how the last Sprint went", "team", "The Scrum Team inspects how the last Sprint went with regards to individuals, interactions, processes, tools, and their Definition of Done.", "Sprint Retrospective", "The Sprint Retrospective is for the whole Scrum Team, including the Product Owner and the Scrum Master."],
+  ["Accountable for the Scrum Team's effectiveness", "sm", "The Scrum Master is accountable for the Scrum Team’s effectiveness.", "Scrum Master", "Effectiveness is the Scrum Master's accountability; maximizing product value is the Product Owner's."],
+  ["Causing the removal of impediments to the Scrum Team's progress", "sm", "Causing the removal of impediments to the Scrum Team’s progress", "Scrum Master", "Note the wording: causing the removal, not removing. The Scrum Master may remove an impediment or get others to remove it."],
+  ["Ensuring that all Scrum events take place and are positive, productive, and kept within the timebox", "sm", "Ensuring that all Scrum events take place and are positive, productive, and kept within the timebox.", "Scrum Master", "The Scrum Master ensures the events take place and are positive, productive and kept within the timebox. The Guide doesn't make the Scrum Master the facilitator of every event."],
+  ["Coaching the team members in self-management and cross-functionality", "sm", "Coaching the team members in self-management and cross-functionality", "Scrum Master", "This is how the Scrum Master serves the Scrum Team: by coaching, not by managing or assigning work."],
+  ["Accountable for establishing Scrum as defined in the Scrum Guide", "sm", "The Scrum Master is accountable for establishing Scrum as defined in the Scrum Guide.", "Scrum Master", "The Scrum Master does this by helping everyone, in the Scrum Team and in the organization, understand Scrum theory and practice."],
+  ["Facilitating stakeholder collaboration for the Product Owner, as requested or needed", "sm", "Facilitating stakeholder collaboration as requested or needed.", "Scrum Master", "Stakeholder collaboration is a Scrum Team activity. Facilitating it, as requested or needed, is one way the Scrum Master serves the Product Owner."],
+  ["Removing barriers between stakeholders and Scrum Teams", "sm", "Removing barriers between stakeholders and Scrum Teams.", "Scrum Master", "This is one way the Scrum Master serves the whole organization."],
+  ["Helping find techniques for effective Product Goal definition and Product Backlog management", "sm", "Helping find techniques for effective Product Goal definition and Product Backlog management", "Scrum Master", "The Product Owner is accountable for the Product Goal and Product Backlog management. The Scrum Master helps find techniques."]
 ];
 
 
@@ -2584,7 +2588,7 @@ function quizNext() {
 }
 
 // ---------- Rapid round ----------
-const BLITZ_TIME = 9000;
+const BLITZ_TIME = 15000;
 const ROLES = [["po", "Product Owner", ["jonas"]], ["dev", "Developers", ["priya", "tom", "lea"]], ["sm", "Scrum Master", ["you"]], ["team", "Whole Scrum Team", ["jonas", "priya", "tom", "lea", "you"]]];
 function startBlitz(from) {
   blitz = { list: shuffle(BLITZ).slice(0, 10), i: 0, right: 0, pts: 0, streak: 0, done: false, pick: null, t0: 0, from, timer: null, finished: false };
@@ -2610,6 +2614,7 @@ function blitzPick(k) {
   else blitz.streak = 0;
   beep(ok ? "good" : "bad");
   renderScene();
+  if (narrow()) { const v = document.querySelector("#scene .verdict"); if (v) v.scrollIntoView({ block: "start", behavior: reduced ? "auto" : "smooth" }); }
 }
 function blitzHtml() {
   const B = blitz;
@@ -2630,7 +2635,7 @@ function blitzHtml() {
     }).join("")}</div>`;
   if (B.done) {
     const ok = B.pick === it[1];
-    h += `<div class="verdict ${ok ? "g2" : "g0"}"><span class="big">${ok ? "Correct" : B.pick ? "Not quite" : "Time's up"}</span></div>${quotesHtml([[it[2], it[3]]])}
+    h += `<div class="verdict ${ok ? "g2" : "g0"}"><span class="big">${ok ? "Correct" : B.pick ? "Not quite" : "Time's up"}</span></div>${it[4] ? `<p class="fbtext">${esc(it[4])}</p>` : ""}${quotesHtml([[it[2], it[3]]])}
       <div class="row"><button class="primary" type="button" data-main data-act="bnext">${B.i + 1 < B.list.length ? "Next" : "See results"}</button><span class="hint">Enter</span></div>`;
   }
   return h + `</div>`;
@@ -2976,7 +2981,6 @@ function renderHome() {
       <section class="entry guide-entry" aria-labelledby="h-guide">
         <h2 id="h-guide">${ICON.book}Scrum Guide 2020</h2>
         <form class="bigsearch" id="homeSearch" role="search">${ICON.search}<input id="hq" type="search" placeholder="Search the Scrum Guide" aria-label="Search the Scrum Guide" autocomplete="off"><button class="primary" type="submit"><span>Search</span>${ICON.search.replace('aria-hidden="true"', 'aria-hidden="true" style="width:16px;height:16px"')}</button></form>
-        <div class="facts">${[["sg-scrum-team", "3", "accountabilities", "Scrum Master, Product Owner, Developers"], ["sg-scrum-events", "5", "events", "Sprint, Planning, Daily, Review, Retro"], ["sg-scrum-artifacts", "3", "artifacts", "each with its commitment"], ["sg-scrum-values", "5", "values", "Commitment, Focus, Openness, Respect, Courage"]].map(([id, n, k, d]) => `<a class="fact" href="#guide/${id}"><b>${n}</b><span>${k}</span></a>`).join("")}</div>
         <div class="row"><a class="primary" href="#guide" data-lang-go="en">Read in English</a><a class="primary alt" href="#guide" data-lang-go="de" lang="de">Auf Deutsch lesen</a></div>
       </section>
       <section class="entry" aria-labelledby="h-game">
