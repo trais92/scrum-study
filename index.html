@@ -2493,15 +2493,7 @@ function titleHtml() {
   const canResume = saved && !saved.done && (saved.pos > 0 || saved.sp > 0);
   return `<div class="place"><span class="where">Spoke Repairs</span><span class="when">PSM I practice · no sign-up</span></div><div class="scene-body"><div class="hero">
     <h1>Scrum Master<span>on Duty</span></h1>
-    <p>Three Sprints with the Spoke Repairs web team. People act on the boards all day. Some of it is fine, some of it quietly breaks Scrum. Every call is yours.</p>
-    <div class="castrow">${["jonas", "priya", "tom", "lea", "you", "maya", "hans"].map(c => face(c, "happy")).join("")}</div>
-    <ul class="how">
-      <li><span class="ic">${ic("move")}</span><span><b>Watch the boards</b>Every item is a repair tag. See where it moves, who moved it, and why.</span></li>
-      <li><span class="ic">${ic("block")}</span><span><b>Let it happen, or step in</b>When someone acts, judge it. Stepping in on something healthy costs the team's trust.</span></li>
-      <li><span class="ic">${ic("goal")}</span><span><b>Live with the results</b>Blockers, shortcuts and pressure change what gets Done, and whether the Sprint Goal is met.</span></li>
-    </ul>
     <div class="row">${canResume ? `<button class="primary" type="button" data-main data-act="resume">Continue Sprint ${saved.sp + 1}, day ${saved.day}</button><button class="primary alt" type="button" data-act="new">New game</button>` : `<button class="primary" type="button" data-main data-act="new">Start Sprint 1</button>`}<button class="primary alt" type="button" data-act="watch">Watch a Sprint</button><button class="primary alt" type="button" data-act="blitz">Who decides? Rapid round</button></div>
-    <p class="hint">Not sure how it works? Watch a Sprint first: it plays itself with the Scrum Master's best calls, and your own game stays as it is. Every rule in the game is checked against the 2020 Scrum Guide, and each call ends with the Guide's own words. About 30 minutes for all three Sprints; your progress is saved in this browser.</p>
   </div></div>`;
 }
 
@@ -2981,39 +2973,30 @@ function renderHome() {
   const quick = [["sg-scrum-team", "Scrum Team"], ["sg-scrum-events", "Events"], ["sg-sprint-planning", "Sprint Planning"], ["sg-daily-scrum", "Daily Scrum"], ["sg-scrum-artifacts", "Artifacts"], ["sg-commitment-definition-of-done", "Definition of Done"], ["sg-scrum-master", "Scrum Master"]];
   const saved = loadGame(); const canResume = saved && !saved.done && (saved.pos > 0 || saved.sp > 0);
   $("v-home").innerHTML = `<div class="wrap home">
-    <section class="welcome">
-      <h1>Pass PSM I with the <span>Scrum Guide</span> at hand</h1>
-      <p>The full 2020 Scrum Guide in English and in the official German translation, exam questions with the Guide's exact words behind every answer, and a game where you are the Scrum Master. Free, no sign-up.</p>
-    </section>
     <div class="entries">
       <section class="entry guide-entry" aria-labelledby="h-guide">
         <h2 id="h-guide">${ICON.book}Scrum Guide 2020</h2>
-        <p class="sub">The whole Guide, searchable. Switch between English and the official German translation without losing your place. Underlined terms explain themselves.</p>
         <form class="bigsearch" id="homeSearch" role="search">${ICON.search}<input id="hq" type="search" placeholder="Search the Scrum Guide" aria-label="Search the Scrum Guide" autocomplete="off"><button class="primary" type="submit"><span>Search</span>${ICON.search.replace('aria-hidden="true"', 'aria-hidden="true" style="width:16px;height:16px"')}</button></form>
         <div class="chips">${quick.map(([id, n]) => `<a class="chip" href="#guide/${id}">${esc(n)}</a>`).join("")}</div>
-        <div class="facts">${[["sg-scrum-team", "3", "accountabilities", "Scrum Master, Product Owner, Developers"], ["sg-scrum-events", "5", "events", "Sprint, Planning, Daily, Review, Retro"], ["sg-scrum-artifacts", "3", "artifacts", "each with its commitment"], ["sg-scrum-values", "5", "values", "Commitment, Focus, Openness, Respect, Courage"]].map(([id, n, k, d]) => `<a class="fact" href="#guide/${id}"><b>${n}</b><span>${k}</span><small>${d}</small></a>`).join("")}</div>
+        <div class="facts">${[["sg-scrum-team", "3", "accountabilities", "Scrum Master, Product Owner, Developers"], ["sg-scrum-events", "5", "events", "Sprint, Planning, Daily, Review, Retro"], ["sg-scrum-artifacts", "3", "artifacts", "each with its commitment"], ["sg-scrum-values", "5", "values", "Commitment, Focus, Openness, Respect, Courage"]].map(([id, n, k, d]) => `<a class="fact" href="#guide/${id}"><b>${n}</b><span>${k}</span></a>`).join("")}</div>
         <div class="row"><a class="primary" href="#guide" data-lang-go="en">Read in English</a><a class="primary alt" href="#guide" data-lang-go="de" lang="de">Auf Deutsch lesen</a></div>
       </section>
       <section class="entry" aria-labelledby="h-game">
         <h2 id="h-game">${ICON.play.replace('fill="currentColor"', 'fill="var(--accent)"')}The game</h2>
         <div class="gamepreview" id="gpreview">${officePreviewHtml()}</div>
-        <p class="sub">Three Sprints at Spoke Repairs. Watch people walk the office, see items move across the boards, and make the Scrum Master's calls.</p>
         <div class="row"><a class="primary" href="#game">${canResume ? `Continue Sprint ${saved.sp + 1}` : "Play"}</a><button class="primary alt" type="button" data-home="watch">${ICON.eye}Watch a Sprint</button></div>
       </section>
     </div>
     <section aria-labelledby="h-prac" style="display:grid;gap:12px">
       <div class="sechead"><h2 id="h-prac">Exam practice</h2><span class="hint">${QS.length} questions · ${rd.seen} seen${rd.pct !== null ? ` · ${rd.pct}% right lately` : ""}</span></div>
       <div class="practice-row">
-        <button class="ptile" type="button" data-home="smart"><b>${ICON.bolt}Smart round</b><span>10 questions, weighted toward what you got wrong or haven't seen.</span></button>
-        <button class="ptile" type="button" data-home="exam"><b>${ICON.clock}Mock exam</b><span>80 questions, 60 minutes, 85% to pass, like PSM I.</span></button>
-        <button class="ptile" type="button" data-home="mistakes" ${mk ? "" : "disabled"}><b>${ICON.redo}My mistakes</b><span>${mk ? `${mk} question${mk > 1 ? "s" : ""} to try again.` : "Nothing yet. Questions you miss land here."}</span></button>
-        <button class="ptile" type="button" data-home="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round: ten statements, nine seconds each.</span></button>
+        <button class="ptile" type="button" data-home="smart"><b>${ICON.bolt}Smart round</b><span>10 questions</span></button>
+        <button class="ptile" type="button" data-home="exam"><b>${ICON.clock}Mock exam</b><span>80 questions · 60 min</span></button>
+        <button class="ptile" type="button" data-home="mistakes" ${mk ? "" : "disabled"}><b>${ICON.redo}My mistakes</b><span>${mk ? `${mk} to redo` : "None yet"}</span></button>
+        <button class="ptile" type="button" data-home="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round</span></button>
       </div>
     </section>
-    <footer class="foot">
-      <span>The Scrum Guide 2020 © Ken Schwaber and Jeff Sutherland, licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>. German text: official translation by the GermanScrumTranslators. Source: <a href="https://scrumguides.org" target="_blank" rel="noopener">scrumguides.org</a>.</span>
-      <span>Practice questions and the game are original study material based on the Guide and are not official Scrum.org exam questions. Your progress stays in this browser.</span>
-    </footer>
+    <footer class="foot"><span>Scrum Guide 2020 © Ken Schwaber &amp; Jeff Sutherland, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>, from <a href="https://scrumguides.org" target="_blank" rel="noopener">scrumguides.org</a>. German: GermanScrumTranslators. Questions are study material, not official Scrum.org questions.</span></footer>
   </div>`;
   $("homeSearch").onsubmit = e => { e.preventDefault(); const v = $("hq").value.trim(); go("guide" + (v ? "?q=" + encodeURIComponent(v) : "")); };
 }
@@ -3054,7 +3037,7 @@ function renderGuideBody(lang) {
   for (const h of body.querySelectorAll("h3[id],h4[id],h5[id]")) {
     const ids = SEC_Q[h.id]; if (!ids) continue;
     const b = document.createElement("button"); b.type = "button"; b.className = "secq"; b.dataset.secq = h.id;
-    b.innerHTML = `${ICON.q}Practice questions on this section (${ids.length})`;
+    b.innerHTML = `${ICON.q}Practice (${ids.length})`; b.title = "Practice questions on this section";
     h.after(b);
   }
   $("toc").innerHTML = [...body.querySelectorAll("h3[id],h4[id],h5[id]")].map(h => `<a href="#guide/${h.id}" data-jump="${h.id}" class="l${h.tagName[1]}">${esc(h.textContent)}${SEC_Q[h.id] ? `<span class="qn" title="Practice questions">${SEC_Q[h.id].length}q</span>` : ""}</a>`).join("");
@@ -3194,16 +3177,15 @@ function renderPractice() {
   const mk = mistakes().length;
   $("pmain").innerHTML = `
     <div class="sechead"><h1 class="ptitle">Exam practice</h1><a class="chip" href="#guide">${ICON.book.replace('aria-hidden="true"', 'aria-hidden="true" style="width:14px;height:14px;vertical-align:-2px"')} Scrum Guide</a></div>
-    <p style="margin:0;color:var(--muted)">${QS.length} questions written against the 2020 Scrum Guide. Every answer shows the Guide's exact words. The real PSM I: 80 questions, 60 minutes, 85% to pass, in English.</p>
     <div class="practice-row">
-      <button class="ptile" type="button" data-p="smart"><b>${ICON.bolt}Smart round</b><span>10 questions, weighted toward mistakes and new ones.</span></button>
-      <button class="ptile" type="button" data-p="exam"><b>${ICON.clock}Mock exam</b><span>80 questions, 60 minutes. No feedback until you submit.</span></button>
-      <button class="ptile" type="button" data-p="mistakes" ${mk ? "" : "disabled"}><b>${ICON.redo}My mistakes</b><span>${mk ? `${mk} to try again.` : "None yet."}</span></button>
-      <button class="ptile" type="button" data-p="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round in the game.</span></button>
+      <button class="ptile" type="button" data-p="smart"><b>${ICON.bolt}Smart round</b><span>10 questions</span></button>
+      <button class="ptile" type="button" data-p="exam"><b>${ICON.clock}Mock exam</b><span>80 questions · 60 min</span></button>
+      <button class="ptile" type="button" data-p="mistakes" ${mk ? "" : "disabled"}><b>${ICON.redo}My mistakes</b><span>${mk ? `${mk} to redo` : "None yet"}</span></button>
+      <button class="ptile" type="button" data-p="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round</span></button>
     </div>
     <section class="pcard"><h2>By topic</h2><div class="ptopics">${Object.entries(QB.topics).map(([k, name]) => {
       const s = topicScore(k); const pt = s.pct === null ? "not started" : s.pct + "%";
-      return `<div class="ptopic"><div><div class="nm">${esc(name)}</div><div class="sb">${esc(TOPIC_SUB[k] || "")} · ${s.seen}/${s.total} seen</div></div><div class="meterbar" role="img" aria-label="${pt}"><i style="width:${s.pct || 0}%"></i></div><div class="row" style="flex-wrap:nowrap"><span class="pct">${pt}</span><button class="pbtn" type="button" data-topic="${k}">Practise</button></div></div>`;
+      return `<div class="ptopic"><div><div class="nm">${esc(name)}</div><div class="sb">${s.seen}/${s.total} seen</div></div><div class="meterbar" role="img" aria-label="${pt}"><i style="width:${s.pct || 0}%"></i></div><div class="row" style="flex-wrap:nowrap"><span class="pct">${pt}</span><button class="pbtn" type="button" data-topic="${k}">Practise</button></div></div>`;
     }).join("")}</div></section>
     <section class="pcard"><h2>Mock exams</h2><div class="histrow">${pstore.exams.length ? pstore.exams.slice(-14).map(e => `<span class="hchip ${e.score >= 85 ? "pass" : "fail"}">${esc(e.date)} · ${e.score}%</span>`).join("") : `<span class="hint">No mock exams yet. Try one once each topic looks good.</span>`}</div>
       <div class="row" id="presetRow"><button class="pbtn" type="button" data-p="askreset">Reset my progress</button></div></section>`;
