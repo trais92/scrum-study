@@ -3040,7 +3040,7 @@ function renderGuideBody(lang) {
     b.innerHTML = `${ICON.q}Practice (${ids.length})`; b.title = "Practice questions on this section";
     h.after(b);
   }
-  $("toc").innerHTML = [...body.querySelectorAll("h3[id],h4[id],h5[id]")].map(h => `<a href="#guide/${h.id}" data-jump="${h.id}" class="l${h.tagName[1]}">${esc(h.textContent)}${SEC_Q[h.id] ? `<span class="qn" title="Practice questions">${SEC_Q[h.id].length}q</span>` : ""}</a>`).join("");
+  $("toc").innerHTML = [...body.querySelectorAll("h3[id],h4[id],h5[id]")].map(h => `<a href="#guide/${h.id}" data-jump="${h.id}" class="l${h.tagName[1]}">${esc(h.textContent)}</a>`).join("");
   if (gquery) runSearch(gquery, false);
   markToc();
 }
