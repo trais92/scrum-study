@@ -1,0 +1,11 @@
+# Delta keeps per-thread clones and worktrees inside the repo
+.delta/
+
+# Build output (copy dist/index.html to the root to publish)
+dist/
+
+# Test output and tools
+src/tests/shots/
+src/tests/page.html
+node_modules/
+__pycache__/

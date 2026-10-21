@@ -1,0 +1,4 @@
+# Same line endings on Windows and Linux, so a rebuild matches the live page byte for byte
+* text=auto eol=lf
+*.pdf binary
+*.png binary
