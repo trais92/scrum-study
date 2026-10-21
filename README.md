@@ -23,14 +23,21 @@ Python 3.10 or newer, no packages needed. Open `dist/index.html` in a browser to
 
 ## Tests
 
-Install Node.js and npm, then install the test tools and Chromium once:
+Install Node.js and npm, then install the pinned test tools and Chromium once:
 
 ```
-npm install
+npm ci
 npx playwright install chromium
 ```
 
-Run `npm test` to rebuild `dist/`, check the Guide quotes, simulate a game, and run the browser smoke checks on desktop and phone-sized viewports.
+Run `npm test` to validate the question bank, rebuild `dist/`, check the Guide quotes, simulate a game, and run browser smoke checks on desktop and phone-sized viewports.
+
+CI reports two separate checks:
+
+- **Test suite** is red if the build, question-bank validation, Guide quote check, game simulation, or desktop/phone browser smoke checks fail.
+- **Live-page freshness** is red if rebuilding `dist/index.html` produces a different file from the committed `index.html`. Rebuild and copy `dist/index.html` to `index.html` before committing.
+
+`npm test` runs only the checks listed above. `src/tests/batch.js`, `e2e.js`, `inv2.js`, `phone.js`, `qa-fix.js`, and `watch.js` are legacy/manual investigation scripts; they are not part of the automated test suite. `paths.js` is a helper used by browser scripts.
 
 | Path | What it is |
 |---|---|
