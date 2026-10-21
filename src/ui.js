@@ -621,15 +621,22 @@ document.addEventListener("keydown", e => {
 
 // ---------- Watch mode: a Sprint plays itself, with the Scrum Master's best calls ----------
 // Runs on its own copy of the game, so it never touches the player's saved game.
-const watch = { on: false, paused: false, speed: 1, timer: null, saved: null, savedMode: "title", caption: "", sp: 0, steps: 0 };
+const watch = { on: false, paused: false, speed: 1, timer: null, saved: null, savedMode: "title", caption: "", recent: [], sp: 0, steps: 0 };
 const textLen = (...a) => a.flat(3).filter(x => typeof x === "string").join(" ").length;
+const watchRates = [0.5, 1, 2];
+const watchRate = () => watchRates[watch.speed - 1] || 1;
+function watchCaption(text) {
+  watch.caption = text;
+  if (text && text !== watch.recent[0]) watch.recent = [text, ...watch.recent].slice(0, 3);
+}
 function watchStart() {
   clearTimeout(watch.timer);
   if (blitz) clearTimeout(blitz.timer);
   if (!watch.on) { watch.saved = mode === "game" && S && !S.preview ? S : loadGame(); watch.savedMode = mode; }
   closeDrawer();
   S = newGame(); start(S);
-  Object.assign(watch, { on: true, paused: false, sp: 0, steps: 0, caption: "Sprint 1 begins" });
+  Object.assign(watch, { on: true, paused: false, sp: 0, steps: 0, caption: "", recent: [] });
+  watchCaption("Sprint 1 begins");
   mode = "game"; lastKey = ""; office.key = "";
   renderAll(true); window.scrollTo({ top: 0 });
   watchNext(1200);
@@ -660,7 +667,7 @@ function watchPause(p) {
 function watchNext(ms) {
   clearTimeout(watch.timer);
   if (!watch.on || watch.paused) return;
-  watch.timer = setTimeout(watchStep, Math.max(250, ms / watch.speed));
+  watch.timer = setTimeout(watchStep, Math.max(250, ms / watchRate()));
 }
 function bestPick(b) {
   if (S.phase === "call") return b.ok ? "allow" : "step";
@@ -674,7 +681,7 @@ function watchStep() {
   watch.steps++;
   if (b.k === "end") {
     watch.paused = true;
-    watch.caption = S.sp < 2 ? `Sprint ${S.sp + 1} is over. Play it yourself, or keep watching.` : "All three Sprints watched.";
+    watchCaption(S.sp < 2 ? `Sprint ${S.sp + 1} is over. Play it yourself, or keep watching.` : "All three Sprints watched.");
     renderWatchbar(); return;
   }
   if (S.phase === "read" || b.k === "day") {
@@ -685,7 +692,7 @@ function watchStep() {
   const pick = bestPick(b);
   const sel = typeof pick === "string" ? `#scene [data-act="${pick}"]` : `#scene [data-opt="${pick}"]`;
   const btn = document.querySelector(sel);
-  watch.caption = typeof pick === "string" ? (pick === "allow" ? "The Scrum Master lets it happen." : "The Scrum Master steps in.") : "The Scrum Master picks: " + (btn ? btn.textContent.trim() : "the best response");
+  watchCaption(typeof pick === "string" ? (pick === "allow" ? "The Scrum Master lets it happen." : "The Scrum Master steps in.") : "The Scrum Master picks: " + (btn ? btn.textContent.trim() : "the best response"));
   if (btn) { btn.classList.add("picking"); btn.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" }); }
   renderWatchbar();
   watch.timer = setTimeout(() => {
@@ -694,29 +701,47 @@ function watchStep() {
     if (r) beep(r.g === 2 && !r.falseAlarm ? "good" : "tick");
     renderAll(true);
     if (S.phase === "fb") { const v = document.querySelector("#scene .verdict"); v && v.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" }); }
-    watch.caption = S.phase === "fb" ? "Why this is the Scrum way:" : "Choosing how to step in…";
+    watchCaption(S.phase === "fb" ? "Why this is the Scrum way:" : "Choosing how to step in…");
     renderWatchbar();
     watchNext(S.phase === "fb" ? 2200 + Math.min(9000, textLen(S.res.fb, S.res.lines || [], b.g || []) * 22) : 2600);
-  }, Math.max(350, 1300 / watch.speed));
+  }, Math.max(350, 1300 / watchRate()));
 }
 function afterWatchMove() {
   renderAll(true);
   if (S.sp !== watch.sp) watch.sp = S.sp;
   if (narrow()) window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
   else { const sb = document.querySelector(".scene-body"); if (sb) sb.scrollTop = 0; }
-  if (S.done) { watch.paused = true; watch.caption = "All three Sprints watched."; renderWatchbar(); return; }
+  if (S.done) { watch.paused = true; watchCaption("All three Sprints watched."); renderWatchbar(); return; }
   const b = beat(S), v = S.view;
-  if (b.k === "day") { watch.caption = `Day ${S.day}: the days since the last moment, fast-forward.`; renderWatchbar(); watchNext(reduced ? 2600 : 6200); return; }
-  if (b.k === "end") { watch.caption = "The Sprint ends."; renderWatchbar(); watchNext(4200); return; }
+  if (b.k === "day") { watchCaption(`Day ${S.day}: the days since the last moment, fast-forward.`); renderWatchbar(); watchNext(reduced ? 2600 : 6200); return; }
+  if (b.k === "end") { watchCaption("The Sprint ends."); renderWatchbar(); watchNext(4200); return; }
   const talk = 1200 + v.lines.length * 380 + Math.min(9000, textLen(v.n || "", v.lines, v.act || "", v.q || "") * 24);
-  watch.caption = S.phase === "call" ? "Someone acts on the board. Fine, or does it break Scrum?" : S.phase === "ask" ? "The Scrum Master thinks it over…" : b.k === "say" ? "Listen in." : "";
+  watchCaption(S.phase === "call" ? "Someone acts on the board. Fine, or does it break Scrum?" : S.phase === "ask" ? "The Scrum Master thinks it over…" : b.k === "say" ? "Listen in." : "");
   renderWatchbar();
   watchNext(b.k === "say" ? talk + Math.min(6000, textLen(b.g || []) * 12) : talk);
 }
 function watchbarHtml() {
-  const prog = Math.min(100, Math.round((S.sp * 10 + S.day) / 30 * 100));
-  return `<div class="watchbar" id="watchbar" role="status"><b>${watch.paused ? "Paused" : "Watching"}</b><span>Sprint ${S.sp + 1}, day ${S.day}</span><span class="wprog" aria-hidden="true"><i style="width:${prog}%"></i></span><span class="wcap">${esc(watch.caption)}</span><span class="wbtns">${S.done || beat(S).k === "end" && watch.paused ? `${!S.done ? `<button type="button" data-act="wmore">Watch Sprint ${S.sp + 2}</button>` : ""}<button type="button" data-act="wplay">Play it yourself</button>` : `<button type="button" data-act="wpause" aria-pressed="${watch.paused}">${watch.paused ? "Resume" : "Pause"}</button><button type="button" data-act="wspeed" aria-label="Speed">${watch.speed}×</button>`}
-<button type="button" data-act="wstop">Stop</button></span></div>`;
+  const complete = Math.max(0, Math.min(10, S.day - 1));
+  const progress = Array.from({ length: 3 }, (_, i) => {
+    const value = i < S.sp ? 10 : i === S.sp ? complete + 1 : 0;
+    const pct = value * 10;
+    return `<span class="wsprint${i === S.sp ? " current" : i < S.sp ? " done" : ""}" role="progressbar" aria-label="Sprint ${i + 1} progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="${value}"><i style="width:${pct}%"></i></span>`;
+  }).join("");
+  const ended = S.done || beat(S).k === "end" && watch.paused;
+  const recent = watch.recent.slice(1, 3);
+  return `<section class="watchbar" id="watchbar" aria-label="Sprint broadcast">
+    <div class="wtop">
+      <div class="widentity"><span class="wlive${watch.paused ? " paused" : ""}">${watch.paused ? "Paused" : "Live watch"}</span><div><b>Sprint ${S.sp + 1}</b><span class="wday">Day ${S.day} <i>/ 10</i></span></div></div>
+      <div class="wbtns" aria-label="Watch controls">${ended ? `${!S.done ? `<button type="button" class="wprimary" data-act="wmore">Watch Sprint ${S.sp + 2}</button>` : ""}<button type="button" class="wprimary" data-act="wplay">Play it yourself</button>` : `<button type="button" data-act="wpause" aria-pressed="${watch.paused}">${watch.paused ? "Resume" : "Pause"}</button><button type="button" data-act="wspeed" aria-label="Playback speed ${watch.speed}×">${watch.speed}× <span>speed</span></button>`}<button type="button" class="wstop" data-act="wstop">Stop</button></div>
+    </div>
+    <div class="wprogress" aria-label="Three-Sprint progress">
+      <div class="wtracks" role="group" aria-label="Progress across all three Sprints">${progress}</div>
+      <div class="wprogress-meta"><span>Sprint ${S.sp + 1} of 3</span><span>Day ${S.day} of 10</span></div>
+      <div class="wdaytrack" role="progressbar" aria-label="Current Sprint day progress" aria-valuemin="1" aria-valuemax="10" aria-valuenow="${S.day}"><i style="width:${Math.min(100, S.day * 10)}%"></i></div>
+    </div>
+    <div class="wnow" aria-live="polite"><span>Now</span><p>${esc(watch.caption || "The team is getting ready…")}</p></div>
+    ${recent.length ? `<div class="wtrail" aria-label="Recent events"><span>Earlier</span>${recent.map(text => `<span>${esc(text)}</span>`).join("")}</div>` : ""}
+  </section>`;
 }
 function renderWatchbar() {
   const old = $("watchbar");

@@ -247,13 +247,36 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .nooffice .office .otoggle { top: 5px; bottom: auto; }
 
 /* watch mode */
-.watchbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 12px; border-radius: 10px; background: var(--ink); color: var(--panel); font-size: 13.5px; }
-.watchbar b { font-family: var(--f-display); font-weight: 800; font-size: 16px; text-transform: uppercase; letter-spacing: .04em; }
-.watchbar .sp { flex: 1; }
-.watchbar button { border: 1px solid rgba(255, 255, 255, .35); background: transparent; color: inherit; border-radius: 7px; padding: 4px 10px; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
-.watchbar button:hover { background: rgba(255, 255, 255, .12); }
-.watchbar .wprog { width: 60px; height: 4px; border-radius: 99px; background: rgba(255, 255, 255, .2); overflow: hidden; }
-.watchbar .wprog i { display: block; height: 100%; background: var(--accent); }
+.watchbar { display: grid; gap: 12px; margin-bottom: 10px; padding: 14px; border: 1px solid #344453; border-radius: 14px; background: linear-gradient(145deg, #1d2b38, #111a23); color: #f3efe6; box-shadow: 0 8px 22px rgba(17, 26, 35, .2); }
+.wtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.widentity { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.widentity > div { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; }
+.widentity b { font-family: var(--f-display); font-weight: 900; font-size: 19px; text-transform: uppercase; letter-spacing: .035em; }
+.wlive { display: inline-flex; align-items: center; gap: 6px; flex: none; border-radius: 99px; padding: 5px 8px; background: #d8523e; color: #fff; font: 800 10px/1 var(--f-mono); text-transform: uppercase; letter-spacing: .08em; }
+.wlive::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.wlive.paused { background: #697582; }
+.wday { color: #f3c66d; font: 700 13px var(--f-mono); white-space: nowrap; }
+.wday i { color: rgba(243, 239, 230, .58); font-style: normal; }
+.watchbar .wbtns { display: flex; align-items: center; justify-content: flex-end; flex: none; flex-wrap: nowrap; gap: 6px; }
+.watchbar button { min-height: 34px; border: 1px solid rgba(243, 239, 230, .35); background: rgba(255, 255, 255, .045); color: inherit; border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; white-space: nowrap; }
+.watchbar button:hover { background: rgba(255, 255, 255, .13); }
+.watchbar button:focus-visible { outline: 3px solid #f3c66d; outline-offset: 2px; }
+.watchbar .wbtns .wprimary { border-color: #f3c66d; background: #f3c66d; color: #17212a; }
+.watchbar .wbtns .wprimary:hover { background: #ffda87; }
+.watchbar .wbtns .wstop { color: rgba(243, 239, 230, .75); }
+.wprogress { display: grid; gap: 5px; }
+.wtracks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.wsprint { display: block; height: 6px; overflow: hidden; border-radius: 99px; background: rgba(243, 239, 230, .2); }
+.wsprint i, .wdaytrack i { display: block; height: 100%; border-radius: inherit; background: #f3c66d; }
+.wsprint:not(.current) i { background: #71c59a; }
+.wprogress-meta { display: flex; justify-content: space-between; gap: 8px; color: rgba(243, 239, 230, .72); font: 600 10px var(--f-mono); }
+.wdaytrack { height: 3px; overflow: hidden; border-radius: 99px; background: rgba(243, 239, 230, .12); }
+.wdaytrack i { background: #f3c66d; transition: width .3s ease; }
+.wnow { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 9px; padding: 10px 11px; border-left: 3px solid #f3c66d; border-radius: 0 9px 9px 0; background: rgba(255, 255, 255, .07); }
+.wnow > span, .wtrail > span:first-child { color: #f3c66d; font: 800 10px var(--f-mono); letter-spacing: .09em; text-transform: uppercase; }
+.wnow p { margin: 0; font-size: 13px; font-weight: 650; line-height: 1.4; }
+.wtrail { display: flex; flex-wrap: wrap; gap: 5px 9px; align-items: baseline; color: rgba(243, 239, 230, .57); font-size: 10.5px; line-height: 1.3; }
+.wtrail > span:not(:first-child)::before { content: "· "; color: #f3c66d; }
 .opt.picking { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .cbtn.picking { outline: 3px solid var(--accent); outline-offset: 2px; }
 
@@ -290,14 +313,12 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
   .qtext { font-size: 18px; }
 }
 @media (max-width: 380px) { .nav a span { display: none; } .nav a { padding: 8px 12px; } }
-.watchbar { margin-bottom: 10px; position: sticky; top: 0; z-index: 4; }
-.watchbar .wcap { flex: 1 1 220px; min-width: 0; opacity: .9; }
-.watchbar .sp { display: none; }
+.watchbar { position: sticky; top: 0; z-index: 4; }
 .scene.watching .scene-body button { pointer-events: none; }
 .scene.watching .scene-body .opt:not(.picking):not(.right):not(.wrong) { opacity: .85; }
 .opt.picking, .cbtn.picking { animation: pickpulse .9s ease-in-out infinite alternate; }
 @keyframes pickpulse { from { box-shadow: 0 0 0 2px var(--accent-soft); } to { box-shadow: 0 0 0 6px var(--accent-soft); } }
-@media (prefers-reduced-motion: reduce) { .opt.picking, .cbtn.picking { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .opt.picking, .cbtn.picking { animation: none; } .wdaytrack i { transition: none; } }
 .gamepreview .pv-cap { font-family: var(--f-mono); font-weight: 700; }
 .gamepreview > svg { display: block; width: 100%; height: auto; }
 
@@ -314,10 +335,6 @@ a.primary { text-decoration: none; }
 .sg table { display: block; max-width: 100%; overflow-x: auto; }
 .sg td, .sg th { overflow-wrap: anywhere; }
 .sg a { overflow-wrap: anywhere; }
-.watchbar { position: static; background: #15212c; color: #f3efe6; }
-.watchbar .wcap { order: 9; flex: 1 1 100%; }
-.watchbar button:first-of-type { margin-left: auto; }
-.watchbar button { border-color: rgba(243, 239, 230, .35); }
 .sboard { background: var(--o-board); }
 .room .rname { font-size: clamp(8px, 1.55cqw, 11px); }
 .ftag { font-size: clamp(7px, 1.25cqw, 9px); }
@@ -327,11 +344,17 @@ a.primary { text-decoration: none; }
 .popt .misslbl { display: block; font-size: 12px; color: var(--good); font-weight: 700; margin-top: 2px; }
 .qmap button.done { background: var(--ink); color: var(--panel); border-color: var(--ink); }
 .qmap button.flag::after { top: -3px; right: -3px; width: 10px; height: 10px; box-shadow: 0 0 0 2px var(--panel); }
-.watchbar .wbtns { display: inline-flex; gap: 6px; margin-left: auto; flex-wrap: nowrap; }
-.watchbar button:first-of-type { margin-left: 0; }
 .blitzstop { justify-self: start; font-size: 13px; }
 .bigsearch .primary svg { color: inherit; }
 @media (max-width: 620px) {
+  .watchbar { position: static; gap: 10px; padding: 11px; }
+  .wtop { align-items: flex-start; flex-direction: column; gap: 9px; }
+  .widentity { width: 100%; }
+  .widentity b { font-size: 17px; }
+  .watchbar .wbtns { width: 100%; justify-content: stretch; }
+  .watchbar .wbtns button { flex: 1 1 auto; padding-inline: 8px; }
+  .watchbar .wbtns button span { display: none; }
+  .wtrail > span:nth-child(n+3) { display: none; }
   .qhead { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; row-gap: 2px; }
   .qhead .mode { grid-column: 1; }
   .qhead .hint { grid-column: 1; grid-row: 2; }

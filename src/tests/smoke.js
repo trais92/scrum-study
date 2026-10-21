@@ -68,8 +68,14 @@ const OUT = shotsDir + "/app-";
   await page.click('.nav a[data-nav="game"]'); await page.waitForTimeout(800);
   await page.screenshot({ path: OUT + tag + "-game-title.png" }); await ov("gtitle");
   await page.click('#scene [data-act="watch"]'); await page.waitForTimeout(2500);
+  const speedMap = [[1, 0.5], [2, 1], [3, 2], [1, 0.5]];
+  for (const [index, [label, rate]] of speedMap.entries()) {
+    const actual = await page.evaluate(() => [watch.speed, watchRate()]);
+    if (actual[0] !== label || actual[1] !== rate) errs.push(`WATCH SPEED ${index ? "cycle" : "default"} expected ${label}×/${rate}x, got ${actual}`);
+    if (index < speedMap.length - 1) await page.click('[data-act="wspeed"]');
+  }
+  await page.click('[data-act="wspeed"]'); await page.click('[data-act="wspeed"]');
   await page.screenshot({ path: OUT + tag + "-watch-1.png" });
-  await page.evaluate(() => { watch.speed = 3; });
   for (let i = 0; i < 8; i++) { await page.waitForTimeout(2500); if (i % 3 === 2) await page.screenshot({ path: OUT + tag + `-watch-${i + 2}.png` }); }
   console.log("watch at", await page.evaluate(() => [S.sp, S.day, S.pos, S.phase, watch.caption, localStorage.getItem("smod-game-v1") ? "saved!" : "nosave"]));
   await page.click('[data-act="wstop"]'); await page.waitForTimeout(400);

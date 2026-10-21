@@ -8,7 +8,7 @@ const { appUrl, shotsDir } = require("./paths.js");
   const before = await p.evaluate(() => localStorage.getItem("smod-game-v1"));
   await p.click('.brand'); await p.waitForTimeout(300);
   await p.click('[data-home="watch"]'); await p.waitForTimeout(500);
-  await p.evaluate(() => { watch.speed = 40; });
+  await p.evaluate(() => { watch.speed = 3; });
   let last = "";
   for (let i = 0; i < 400; i++) {
     await p.waitForTimeout(250);
