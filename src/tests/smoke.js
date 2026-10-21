@@ -21,6 +21,19 @@ const OUT = shotsDir + "/app-";
   await page.waitForTimeout(600);
   console.log("guide hash", await page.evaluate(() => location.hash), "count", await page.textContent("#gcount"));
   await page.screenshot({ path: OUT + tag + "-guide-search.png" }); await ov("guide");
+  if (mode === "phone") {
+    const bounds = await page.evaluate(() => {
+      const search = document.querySelector(".search").getBoundingClientRect();
+      const next = document.querySelector("#gnext").getBoundingClientRect();
+      return {
+        searchLeft: search.left, searchRight: search.right, searchTop: search.top, searchBottom: search.bottom,
+        nextLeft: next.left, nextRight: next.right, nextTop: next.top, nextBottom: next.bottom
+      };
+    });
+    if (bounds.nextLeft < bounds.searchLeft - 1 || bounds.nextRight > bounds.searchRight + 1 || bounds.nextTop < bounds.searchTop - 1 || bounds.nextBottom > bounds.searchBottom + 1) {
+      errs.push(`GUIDE SEARCH NEXT OUTSIDE .search ${JSON.stringify(bounds)}`);
+    }
+  }
   await page.click("#gnext"); await page.waitForTimeout(500);
   await page.screenshot({ path: OUT + tag + "-guide-next.png" });
   // toggle German
