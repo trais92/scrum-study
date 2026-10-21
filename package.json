@@ -1,0 +1,11 @@
+{
+  "name": "scrum-study-tests",
+  "private": true,
+  "scripts": {
+    "build": "python3 src/build.py",
+    "test": "npm run build && node src/tests/quotes.js && node src/tests/sim.js best && node src/tests/smoke.js desktop light && node src/tests/smoke.js phone light"
+  },
+  "devDependencies": {
+    "playwright": "^1.52.0"
+  }
+}

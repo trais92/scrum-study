@@ -1,9 +1,6 @@
 const { chromium } = require("playwright");
-const fs = require("fs");
-const page_ = fs.readFileSync(__dirname + "/../v2/scrum-master-on-duty.html", "utf8");
-const wrapped = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style></head><body>${page_}</body></html>`;
-fs.writeFileSync(__dirname + "/page.html", wrapped);
-const OUT = __dirname + "/shots/"; fs.mkdirSync(OUT, { recursive: true });
+const { appUrl, shotsDir } = require("./paths.js");
+const OUT = shotsDir + "/";
 (async () => {
   const browser = await chromium.launch();
   const mode = process.argv[2] || "desktop";
@@ -14,7 +11,7 @@ const OUT = __dirname + "/shots/"; fs.mkdirSync(OUT, { recursive: true });
   const errs = [];
   page.on("console", m => { if (m.type() === "error") errs.push(m.text()); });
   page.on("pageerror", e => errs.push("PAGEERROR " + e.message));
-  await page.goto("file://" + __dirname + "/page.html#game");
+  await page.goto(appUrl + "#game");
   await page.waitForTimeout(300);
   await page.screenshot({ path: OUT + mode + "-00-title.png" });
   await page.click('[data-act="new"]');

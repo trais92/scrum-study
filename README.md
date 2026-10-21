@@ -21,6 +21,17 @@ cp dist/index.html index.html # publish: commit and push to main
 
 Python 3.10 or newer, no packages needed. Open `dist/index.html` in a browser to try a build before publishing.
 
+## Tests
+
+Install Node.js and npm, then install the test tools and Chromium once:
+
+```
+npm install
+npx playwright install chromium
+```
+
+Run `npm test` to rebuild `dist/`, check the Guide quotes, simulate a game, and run the browser smoke checks on desktop and phone-sized viewports.
+
 | Path | What it is |
 |---|---|
 | `index.html` | The live page (built file, do not edit by hand) |
@@ -29,7 +40,7 @@ Python 3.10 or newer, no packages needed. Open `dist/index.html` in a browser to
 | `src/engine.js`, `src/story.js`, `src/office.js` | The game: rules, story and animated office |
 | `src/guide/` | Scrum Guide 2020: English, official German (from the PDF) and term explanations |
 | `data/questions.json` | The practice question bank, each answer with its Scrum Guide quote |
-| `src/tests/` | Playwright checks from earlier work (paths need updating, see the backlog) |
+| `src/tests/` | Quote, game simulation, and Playwright checks |
 | `docs/` | Backlog and notes for working with agents in Delta |
 
 The state before the Delta setup is kept on the branch `pre-delta-2026-10-21`.

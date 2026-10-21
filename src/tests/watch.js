@@ -1,8 +1,9 @@
 const { chromium } = require("playwright");
+const { appUrl, shotsDir } = require("./paths.js");
 (async () => {
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1366, height: 900 } }); const p = await ctx.newPage();
   const errs = []; p.on("pageerror", e => errs.push(e.message)); p.on("console", m => m.type() === "error" && errs.push(m.text()));
-  await p.goto("file://" + __dirname + "/../v2/index.html#game"); await p.waitForTimeout(500);
+  await p.goto(appUrl + "#game"); await p.waitForTimeout(500);
   await p.click('#scene [data-act="new"]'); await p.click('#scene [data-act="cont"]'); await p.waitForTimeout(300);
   const before = await p.evaluate(() => localStorage.getItem("smod-game-v1"));
   await p.click('.brand'); await p.waitForTimeout(300);
@@ -15,7 +16,7 @@ const { chromium } = require("playwright");
     const k = JSON.stringify(st); if (k !== last) last = k;
     if (st.paused) { console.log("paused at", k); break; }
   }
-  await p.screenshot({ path: __dirname + "/shots/watch-end.png" });
+  await p.screenshot({ path: shotsDir + "/watch-end.png" });
   const after = await p.evaluate(() => localStorage.getItem("smod-game-v1"));
   console.log("save untouched:", before === after);
   await p.click('[data-act="wmore"]'); await p.waitForTimeout(3000);

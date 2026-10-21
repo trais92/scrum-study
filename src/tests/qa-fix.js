@@ -1,6 +1,7 @@
 const { chromium } = require("playwright");
-const URL = "file://" + __dirname + "/../v2/index.html";
-const OUT = __dirname + "/shots/fix-";
+const { appUrl, shotsDir } = require("./paths.js");
+const URL = appUrl;
+const OUT = shotsDir + "/fix-";
 (async () => {
   const b = await chromium.launch();
   const errs = [];

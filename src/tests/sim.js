@@ -1,6 +1,6 @@
-const fs = require("fs"), vm = require("vm");
-const dir = __dirname + "/../v2/";
-const code = fs.readFileSync(dir + "engine.js", "utf8").replace(/if \(typeof module[^\n]*\n/g, "") + "\n" + fs.readFileSync(dir + "story.js", "utf8").replace(/if \(typeof module[^\n]*\n/g, "") + "\n;globalThis.API={newGame,start,cont,answer,beat,forecast,goalStatus,whoOptions,SPRINTS,EVENTS,BLITZ,Q,val};";
+const fs = require("fs"), path = require("path"), vm = require("vm");
+const dir = path.join(__dirname, "..");
+const code = fs.readFileSync(path.join(dir, "engine.js"), "utf8").replace(/^if \(typeof module[^\n]*\n/gm, "") + "\n" + fs.readFileSync(path.join(dir, "story.js"), "utf8").replace(/^if \(typeof module[^\n]*\n/gm, "") + "\n;globalThis.API={newGame,start,cont,answer,beat,forecast,goalStatus,whoOptions,SPRINTS,EVENTS,BLITZ,Q,val};";
 function load() { const ctx = { console, JSON, Math }; vm.createContext(ctx); vm.runInContext(code, ctx); return ctx.API; }
 const A = load();
 // policy: "best" | "random" | "worst"
@@ -46,8 +46,9 @@ function play(policy, verbose) {
 module.exports = { play, A };
 if (require.main === module) {
   const pol = process.argv[2] || "best";
-  const { S, trace } = play(pol, true);
-  console.log(trace.join("\n"));
+  const { S, trace } = play(pol, process.argv.includes("--verbose"));
+  if (trace.length) console.log(trace.join("\n"));
   console.log("score", S.score, "/", S.max, "trust", S.trust, "sprints", JSON.stringify(S.sprintRes.map(r => ({ goal: r.goal, met: r.met, back: r.back }))), "pg", S.pgoalDone);
   console.log("PB", S.pb.join(","), "| INC", S.inc.join(","));
+  if (!S.done) throw new Error("Simulation did not finish all Sprints");
 }

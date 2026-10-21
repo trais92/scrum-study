@@ -1,5 +1,6 @@
 const { chromium } = require("playwright");
-const OUT = __dirname + "/shots/app-";
+const { appUrl, shotsDir } = require("./paths.js");
+const OUT = shotsDir + "/app-";
 (async () => {
   const browser = await chromium.launch();
   const mode = process.argv[2] || "desktop", scheme = process.argv[3] || "light";
@@ -7,11 +8,12 @@ const OUT = __dirname + "/shots/app-";
   const ctx = await browser.newContext({ viewport: vp, deviceScaleFactor: mode === "phone" ? 2 : 1, colorScheme: scheme });
   const page = await ctx.newPage();
   const errs = [];
+  await page.route("https://fonts.googleapis.com/**", route => route.fulfill({ status: 200, contentType: "text/css", body: "" }));
   page.on("console", m => { if (m.type() === "error") errs.push(m.text()); });
   page.on("pageerror", e => errs.push("PAGEERROR " + e.message));
   const tag = `${mode}-${scheme}`;
   const ov = async n => { const o = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]); if (o[0] > o[1] + 1) errs.push(`OVERFLOW ${n} ${o}`); };
-  await page.goto("file://" + __dirname + "/../v2/index.html");
+  await page.goto(appUrl);
   await page.waitForTimeout(1500);
   await page.screenshot({ path: OUT + tag + "-home.png", fullPage: true }); await ov("home");
   // guide search
@@ -66,4 +68,5 @@ const OUT = __dirname + "/shots/app-";
   await page.screenshot({ path: OUT + tag + "-home2.png" });
   console.log(tag, "ERRORS", errs.length ? errs : "none");
   await browser.close();
+  if (errs.length) process.exitCode = 1;
 })();

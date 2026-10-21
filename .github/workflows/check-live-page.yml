@@ -1,0 +1,32 @@
+name: Check live page
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Build page
+        run: python3 src/build.py
+      - name: Install test dependencies
+        run: npm install
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run test suite
+        run: npm test
+      - name: Compare with live page
+        run: |
+          if ! cmp -s index.html dist/index.html; then
+            echo "::error::index.html differs from the generated dist/index.html."
+            echo "Rebuild with python3 src/build.py and copy dist/index.html to index.html."
+            exit 1
+          fi
