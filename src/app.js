@@ -9,6 +9,26 @@ try { const raw = JSON.parse(localStorage.getItem(GKEY)); if (raw) gprefs = Obje
 const gsave = () => { try { localStorage.setItem(GKEY, JSON.stringify(gprefs)); } catch (e) {} };
 const sameSet = (x, y) => x.length === y.length && x.every(v => y.includes(v));
 const QS = QB.questions;
+const EXAM_QUESTIONS = EXAM_DATA.map(source => {
+  const section = String(source.section || "");
+  const lower = section.toLowerCase();
+  const t = /event|cancel/.test(lower) ? "events"
+    : /team|accountabilit/.test(lower) ? "team"
+    : /artifact|commitment/.test(lower) ? "artifacts"
+    : /theory|values|definition|evidence/.test(lower) ? "theory" : "sm";
+  return {
+    id: "platform-" + source.id, t, q: source.question,
+    o: source.answers.map(answer => answer.text),
+    a: source.answers.reduce((ids, answer, index) => { if (answer.correct) ids.push(index); return ids; }, []),
+    x: source.explanation || "", r: section, g: [], tf: true,
+    examSource: true, examTest: source.test, examNr: source.nr
+  };
+});
+const EXAM_SETS = Array.from({ length: 6 }, (_, index) => {
+  const test = index + 1;
+  return { id: "exam-" + test, label: "Exam " + test, questions: EXAM_QUESTIONS.filter(q => q.examTest === test).sort((a, b) => a.examNr - b.examNr) };
+});
+const ALL_EXAM_QUESTIONS = EXAM_SETS.flatMap(set => set.questions);
 const ICON = {
   book: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 3h4.5a2 2 0 0 1 2 2v8.5a1.5 1.5 0 0 0-1.5-1.5H2zM14 3H9.5a2 2 0 0 0-1 .3"/><path d="M14 3v9H9a1.5 1.5 0 0 0-1.5 1.5"/></svg>',
   search: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>',
@@ -39,7 +59,7 @@ function sectionIdsFor(r) {
 }
 const SEC_Q = {};
 for (const q of QS) for (const id of sectionIdsFor(q.r)) (SEC_Q[id] = SEC_Q[id] || []).push(q.id);
-const QBYID = Object.fromEntries(QS.map(q => [q.id, q]));
+const QBYID = Object.fromEntries([...QS, ...ALL_EXAM_QUESTIONS].map(q => [q.id, q]));
 
 // ---------- Routing ----------
 let view = "home", guideReturn = null, gscroll = 0;
@@ -96,7 +116,7 @@ function renderHome() {
       <div class="sechead"><h2 id="h-prac">Exam practice</h2><span class="hint">${QS.length} questions · ${rd.seen} seen${rd.pct !== null ? ` · ${rd.pct}% right lately` : ""}</span></div>
       <div class="practice-row">
         <button class="ptile" type="button" data-home="smart"><b>${ICON.bolt}Smart round</b><span>10 questions</span></button>
-        <button class="ptile" type="button" data-home="exam"><b>${ICON.clock}Mock exam</b><span>80 questions · 60 min</span></button>
+        <button class="ptile" type="button" data-home="exam"><b>${ICON.clock}Choose a mock exam</b><span>Six fixed exams plus the question-bank mock</span></button>
         <button class="ptile" type="button" data-home="mistakes" ${mk ? "" : "disabled"}><b>${ICON.redo}My mistakes</b><span>${mk ? `${mk} to redo` : "None yet"}</span></button>
         <button class="ptile" type="button" data-home="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round</span></button>
       </div>
@@ -110,7 +130,7 @@ document.addEventListener("click", e => {
   const h = e.target.closest("[data-home]"); if (!h || h.disabled) return;
   const k = h.dataset.home;
   if (k === "smart") go("practice", () => guardExam(() => startPractice({})));
-  if (k === "exam") go("practice", () => guardExam(startExam));
+  if (k === "exam") go("practice");
   if (k === "mistakes") go("practice", () => guardExam(() => startPractice({ ids: mistakes().map(q => q.id), label: "My mistakes" })));
   if (k === "blitz") go("game", () => { if (watch.on) watchStop(); startBlitz("title"); });
   if (k === "watch") go("game", watchStart);
@@ -284,15 +304,18 @@ function renderPractice() {
     <div class="sechead"><h1 class="ptitle">Exam practice</h1><a class="chip" href="#guide">${ICON.book.replace('aria-hidden="true"', 'aria-hidden="true" style="width:14px;height:14px;vertical-align:-2px"')} Scrum Guide</a></div>
     <div class="practice-row">
       <button class="ptile" type="button" data-p="smart"><b>${ICON.bolt}Smart round</b><span>10 questions</span></button>
-      <button class="ptile" type="button" data-p="exam"><b>${ICON.clock}Mock exam</b><span>80 questions · 60 min</span></button>
       <button class="ptile" type="button" data-p="mistakes" ${mk ? "" : "disabled"}><b>${ICON.redo}My mistakes</b><span>${mk ? `${mk} to redo` : "None yet"}</span></button>
       <button class="ptile" type="button" data-p="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round</span></button>
     </div>
+    <section class="pcard"><h2>Mock exams</h2><div class="practice-row">
+      ${EXAM_SETS.map(set => `<button class="ptile" type="button" data-p="${set.id}"><b>${ICON.clock}${esc(set.label)}</b><span>80 questions · 60 min</span></button>`).join("")}
+      <button class="ptile" type="button" data-p="exam-bank"><b>${ICON.clock}Exam 7 · Question bank</b><span>Random 80 questions · 60 min</span></button>
+    </div></section>
     <section class="pcard"><h2>By topic</h2><div class="ptopics">${Object.entries(QB.topics).map(([k, name]) => {
       const s = topicScore(k); const pt = s.pct === null ? "not started" : s.pct + "%";
       return `<div class="ptopic"><div><div class="nm">${esc(name)}</div><div class="sb">${s.seen}/${s.total} seen</div></div><div class="meterbar" role="img" aria-label="${pt}"><i style="width:${s.pct || 0}%"></i></div><div class="row" style="flex-wrap:nowrap"><span class="pct">${pt}</span><button class="pbtn" type="button" data-topic="${k}">Practise</button></div></div>`;
     }).join("")}</div></section>
-    <section class="pcard"><h2>Mock exams</h2><div class="histrow">${pstore.exams.length ? pstore.exams.slice(-14).map(e => `<span class="hchip ${e.score >= 85 ? "pass" : "fail"}">${esc(e.date)} · ${e.score}%</span>`).join("") : `<span class="hint">No mock exams yet. Try one once each topic looks good.</span>`}</div>
+    <section class="pcard"><h2>Recent results</h2><div class="histrow">${pstore.exams.length ? pstore.exams.slice(-14).map(e => `<span class="hchip ${e.score >= 85 ? "pass" : "fail"}">${esc(e.date)} · ${esc(e.label || "Mock exam")} · ${e.score}%</span>`).join("") : `<span class="hint">No mock exams yet.</span>`}</div>
       <div class="row" id="presetRow"><button class="pbtn" type="button" data-p="askreset">Reset my progress</button></div></section>`;
 }
 document.addEventListener("click", e => {
@@ -302,7 +325,8 @@ document.addEventListener("click", e => {
   if (b.dataset.go !== undefined) { P.i = +b.dataset.go; renderPQ(); return; }
   const k = b.dataset.p || b.dataset.pact;
   if (k === "smart") guardExam(() => startPractice({}));
-  if (k === "exam") guardExam(startExam);
+  if (k === "exam-bank") guardExam(() => startExam());
+  if (/^exam-[1-6]$/.test(k)) guardExam(() => startExam(EXAM_SETS.find(set => set.id === k)));
   if (k === "mistakes") guardExam(() => startPractice({ ids: mistakes().map(q => q.id), label: "My mistakes" }));
   if (k === "leaveyes") { const f = P.pending; clearInterval(P.timer); P = null; saveExam(); f(); return; }
   if (k === "blitz") go("game", () => { if (watch.on) watchStop(); startBlitz("title"); });
@@ -328,14 +352,14 @@ function guardExam(f) {
   f();
 }
 function saveExam() {
-  pstore.exam = P && P.mode === "exam" && !P.done ? { ids: P.items.map(it => it.q.id), order: P.items.map(it => it.order), picked: P.items.map(it => it.picked), flags: [...P.flags], end: P.end, i: P.i } : null;
+  pstore.exam = P && P.mode === "exam" && !P.done ? { ids: P.items.map(it => it.q.id), order: P.items.map(it => it.order), picked: P.items.map(it => it.picked), flags: [...P.flags], end: P.end, i: P.i, label: P.label, examId: P.examId } : null;
   psave();
 }
 function restoreExam() {
   const e = pstore.exam; if (!e || !e.ids) return;
   const items = e.ids.map((id, k) => QBYID[id] && { q: QBYID[id], order: e.order[k], picked: e.picked[k] || [], checked: false });
   if (items.some(x => !x)) { pstore.exam = null; psave(); return; }
-  P = { mode: "exam", label: "Mock exam", items, i: e.i || 0, flags: new Set(e.flags || []), end: e.end };
+  P = { mode: "exam", label: e.label || "Exam 7 · Question bank", examId: e.examId || "exam-bank", items, i: e.i || 0, flags: new Set(e.flags || []), end: e.end };
   P.timer = setInterval(pTick, 1000);
 }
 function pickWeighted(pool, n) {
@@ -358,9 +382,10 @@ function startPractice(opt) {
   P = { mode: "practice", label, items, i: 0, again: opt, flags: new Set() };
   renderPQ(); window.scrollTo({ top: 0 });
 }
-function startExam() {
+function startExam(examSet) {
   if (P && P.timer) clearInterval(P.timer);
-  P = { mode: "exam", label: "Mock exam", items: shuffle(QS).slice(0, 80).map(makeItem), i: 0, flags: new Set(), end: Date.now() + 60 * 60 * 1000 };
+  const questions = examSet ? examSet.questions : shuffle(QS).slice(0, 80);
+  P = { mode: "exam", label: examSet ? examSet.label : "Exam 7 · Question bank", examId: examSet ? examSet.id : "exam-bank", items: questions.map(makeItem), i: 0, flags: new Set(), end: Date.now() + 60 * 60 * 1000 };
   P.timer = setInterval(pTick, 1000);
   saveExam(); renderPQ(); window.scrollTo({ top: 0 });
 }
@@ -375,14 +400,15 @@ function chatHtml(s) {
   return `<div class="qchat"><span class="lbl">Team chat</span>${linesHtml(s.filter(l => LOOK[l[0]]), false)}</div>`;
 }
 function pquoteHtml(q) {
-  const sec = sectionIdsFor(q.r)[0];
-  return `<div class="pquote"><span class="ref">Scrum Guide 2020 · ${esc(q.r)}</span>${(q.g || []).map(g => `<q>${esc(g)}</q>`).join("")}${sec ? `<button type="button" class="linkbtn" data-pact="readguide" data-sec="${sec}">Read this section in the Guide</button>` : ""}</div>`;
+  const sec = q.examSource ? null : sectionIdsFor(q.r)[0];
+  const ref = q.examSource ? esc(q.r) : `Scrum Guide 2020 · ${esc(q.r)}`;
+  return `<div class="pquote"><span class="ref">${ref}</span>${(q.g || []).map(g => `<q>${esc(g)}</q>`).join("")}${sec ? `<button type="button" class="linkbtn" data-pact="readguide" data-sec="${sec}">Read this section in the Guide</button>` : ""}</div>`;
 }
 function renderPQ() {
   const it = P.items[P.i], q = it.q, ex = P.mode === "exam", multi = q.a.length > 1;
   const answered = P.items.filter(x => x.picked.length === x.q.a.length).length;
   let h = `<div class="pcard">
-    <div class="qhead"><span class="mode">${ex ? "Mock exam" : "Practice · " + esc(P.label)}</span><span class="hint">Question ${P.i + 1} of ${P.items.length}</span><span class="sp"></span>${ex ? `<span class="qtimer" id="qtimer" aria-live="off">60:00</span>` : ""}<button class="pbtn" type="button" data-pact="quit">Quit</button></div>
+    <div class="qhead"><span class="mode">${ex ? esc(P.label) : "Practice · " + esc(P.label)}</span><span class="hint">Question ${P.i + 1} of ${P.items.length}</span><span class="sp"></span>${ex ? `<span class="qtimer" id="qtimer" aria-live="off">60:00</span>` : ""}<button class="pbtn" type="button" data-pact="quit">Quit</button></div>
     <div class="qbar"><i style="width:${(ex ? answered : P.i + (it.checked ? 1 : 0)) / P.items.length * 100}%"></i></div>
     <div class="qmeta"><span>${esc(QB.topics[q.t])}</span>${multi ? `<span class="choose">Choose ${q.a.length}</span>` : ""}</div>
     ${q.s ? chatHtml(q.s) : ""}
@@ -394,10 +420,10 @@ function renderPQ() {
     }).join("")}</div>`;
   if (it.checked && !ex) {
     const ok = sameSet(it.picked, q.a);
-    h += `<div class="pfb ${ok ? "ok" : "no"}"><strong>${ok ? "Correct" : "Not quite"}</strong><p>${esc(q.x)}</p>${pquoteHtml(q)}</div>`;
+    h += `<div class="pfb ${ok ? "ok" : "no"}"><strong>${ok ? "Correct" : "Not quite"}</strong>${q.x ? `<p>${esc(q.x)}</p>` : ""}${pquoteHtml(q)}</div>`;
   }
-  if (P.confirm === "leave") h += `<div class="confirm"><span>Your mock exam is still running. Leave it? It won't be scored.</span><div class="row"><button class="pbtn" type="button" data-pact="leaveyes">Leave the exam</button><button class="pbtn" type="button" data-pact="cancel">Keep going</button></div></div>`;
-  if (P.confirm === "quit") h += `<div class="confirm"><span>${ex ? "Quit the mock exam? It won't be scored." : "Quit this round? Answers you already checked are saved."}</span><div class="row"><button class="pbtn" type="button" data-pact="quityes">Quit</button><button class="pbtn" type="button" data-pact="cancel">Keep going</button></div></div>`;
+  if (P.confirm === "leave") h += `<div class="confirm"><span>Your ${esc(P.label)} is still running. Leave it? It won't be scored.</span><div class="row"><button class="pbtn" type="button" data-pact="leaveyes">Leave the exam</button><button class="pbtn" type="button" data-pact="cancel">Keep going</button></div></div>`;
+  if (P.confirm === "quit") h += `<div class="confirm"><span>${ex ? `Quit ${esc(P.label)}? It won't be scored.` : "Quit this round? Answers you already checked are saved."}</span><div class="row"><button class="pbtn" type="button" data-pact="quityes">Quit</button><button class="pbtn" type="button" data-pact="cancel">Keep going</button></div></div>`;
   if (P.confirm === "submit") { const open = P.items.length - answered; h += `<div class="confirm"><span>${open ? `${open} question${open > 1 ? "s are" : " is"} unanswered and ${P.flags.size} flagged. Submit anyway?` : `All questions answered${P.flags.size ? `, ${P.flags.size} still flagged` : ""}. Submit your exam?`}</span><div class="row"><button class="pbtn" type="button" data-pact="submityes">Submit</button><button class="pbtn" type="button" data-pact="cancel">Not yet</button></div></div>`; }
   const actLbl = ex ? (P.i === P.items.length - 1 ? "Review and submit" : "Next") : it.checked ? (P.i === P.items.length - 1 ? "See results" : "Next question") : "Check answer";
   const actDis = !ex && !it.checked && it.picked.length !== q.a.length;
@@ -429,7 +455,7 @@ function finishExam() {
   clearInterval(P.timer);
   P.items.forEach(it => { if (it.picked.length) record(it.q.id, sameSet(it.picked, it.q.a)); });
   const ok = P.items.filter(it => sameSet(it.picked, it.q.a)).length;
-  const d = new Date(); pstore.exams.push({ date: d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }), score: Math.round(ok / P.items.length * 100) });
+  const d = new Date(); pstore.exams.push({ date: d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }), score: Math.round(ok / P.items.length * 100), label: P.label });
   P.done = true; saveExam();
   P.used = Math.round((60 * 60 * 1000 - Math.max(0, P.end - Date.now())) / 60000);
   showPResults(true);
@@ -440,13 +466,13 @@ function showPResults(exam) {
   const by = {}; P.items.forEach(it => { const t = it.q.t; by[t] = by[t] || [0, 0]; by[t][1]++; if (sameSet(it.picked, it.q.a)) by[t][0]++; });
   const wrong = P.items.filter(it => !sameSet(it.picked, it.q.a)); P.wrongIds = wrong.map(it => it.q.id);
   $("pmain").innerHTML = `<div class="pcard">
-    <span class="hint" style="text-transform:uppercase;letter-spacing:.1em;font-weight:700">${exam ? `Mock exam result · ${P.used} min used` : "Practice result · " + esc(P.label)}</span>
+    <span class="hint" style="text-transform:uppercase;letter-spacing:.1em;font-weight:700">${exam ? `${esc(P.label)} result · ${P.used} min used` : "Practice result · " + esc(P.label)}</span>
     <div class="row" style="gap:18px"><span class="bigpct">${pct}%</span><span class="pverdict ${pass ? "pass" : "fail"}">${exam ? (pass ? "Pass" : "Below pass mark") : (pass ? "Exam level" : "Keep practising")}</span></div>
     <span>${ok} of ${n} correct · PSM I pass mark is 85%</span>
     <div class="ptopics">${Object.entries(by).map(([t, [a, m]]) => { const p = Math.round(a / m * 100); return `<div class="ptopic"><div><div class="nm">${esc(QB.topics[t])}</div><div class="sb">${a} of ${m} correct</div></div><div class="meterbar"><i style="width:${p}%"></i></div><span class="pct">${p}%</span></div>`; }).join("")}</div>
     <div class="row">${wrong.length ? `<button class="primary" type="button" data-pact="redo">${wrong.length > 1 ? `Practise these ${wrong.length} again` : "Practise this one again"}</button>` : ""}${!exam ? `<button class="primary alt" type="button" data-pact="again">Another round</button>` : ""}<button class="primary alt" type="button" data-pact="home">Back to practice</button></div>
   </div>
-  ${wrong.length ? `<section class="pcard review"><h2>Review your mistakes (${wrong.length})</h2>${wrong.map(it => { const q = it.q; return `<details><summary>${esc(q.q)}</summary>${q.s ? chatHtml(q.s) : ""}<p class="ans"><span class="w">Your answer:</span> ${it.picked.length ? it.picked.map(i => esc(q.o[i])).join("; ") : "No answer"}</p><p class="ans"><span class="r">Correct:</span> ${q.a.map(i => esc(q.o[i])).join("; ")}</p><p>${esc(q.x)}</p>${pquoteHtml(q)}</details>`; }).join("")}</section>` : ""}`;
+  ${wrong.length ? `<section class="pcard review"><h2>Review your mistakes (${wrong.length})</h2>${wrong.map(it => { const q = it.q; return `<details><summary>${esc(q.q)}</summary>${q.s ? chatHtml(q.s) : ""}<p class="ans"><span class="w">Your answer:</span> ${it.picked.length ? it.picked.map(i => esc(q.o[i])).join("; ") : "No answer"}</p><p class="ans"><span class="r">Correct:</span> ${q.a.map(i => esc(q.o[i])).join("; ")}</p>${q.x ? `<p>${esc(q.x)}</p>` : ""}${pquoteHtml(q)}</details>`; }).join("")}</section>` : ""}`;
   window.scrollTo({ top: 0 });
 }
 document.addEventListener("keydown", e => {

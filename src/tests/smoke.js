@@ -1,5 +1,8 @@
 const { chromium } = require("playwright");
 const { appUrl, shotsDir } = require("./paths.js");
+const fs = require("fs");
+const path = require("path");
+const examData = JSON.parse(fs.readFileSync(path.join(__dirname, "../../data/exams.json"), "utf8"));
 const OUT = shotsDir + "/app-";
 (async () => {
   const browser = await chromium.launch();
@@ -60,10 +63,21 @@ const OUT = shotsDir + "/app-";
   await page.waitForTimeout(300);
   await page.screenshot({ path: OUT + tag + "-practice-dash.png", fullPage: true }); await ov("pdash");
   // exam
-  await page.click('#pmain [data-p="exam"]'); await page.waitForTimeout(300);
+  if (await page.locator('#pmain [data-p^="exam-"]').count() !== 7) errs.push("EXAM SELECTOR COUNT is not 7");
+  await page.click('#pmain [data-p="exam-1"]'); await page.waitForTimeout(300);
+  if (await page.locator('#pmain .qmap button').count() !== 80) errs.push("EXAM 1 does not contain 80 questions");
+  if ((await page.locator('#pmain .qhead .mode').textContent()).trim() !== "Exam 1") errs.push("EXAM 1 title is missing");
+  const firstExamQuestion = examData.find(question => question.test === 1 && question.nr === 1);
+  for (const [index, answer] of firstExamQuestion.answers.entries()) if (answer.correct) await page.click(`#pmain [data-oi="${index}"]`);
   await page.screenshot({ path: OUT + tag + "-exam.png", fullPage: mode === "phone" }); await ov("exam");
   await page.click('#pmain [data-pact="submit"]'); await page.click('#pmain [data-pact="submityes"]'); await page.waitForTimeout(300);
+  if (!(await page.locator("#pmain").innerText()).includes("1 of 80 correct")) errs.push("EXAM 1 did not score the keyed first answer as correct");
   await page.screenshot({ path: OUT + tag + "-exam-res.png" });
+  await page.click('#pmain [data-pact="home"]'); await page.waitForTimeout(200);
+  await page.click('#pmain [data-p="exam-bank"]'); await page.waitForTimeout(300);
+  if ((await page.locator('#pmain .qhead .mode').textContent()).trim() !== "Exam 7 · Question bank") errs.push("EXAM 7 title is missing");
+  if (await page.locator('#pmain .qmap button').count() !== 80) errs.push("EXAM 7 does not contain 80 questions");
+  await page.click('#pmain [data-pact="submit"]'); await page.click('#pmain [data-pact="submityes"]'); await page.waitForTimeout(200);
   // game + watch
   await page.click('.nav a[data-nav="game"]'); await page.waitForTimeout(800);
   await page.screenshot({ path: OUT + tag + "-game-title.png" }); await ov("gtitle");

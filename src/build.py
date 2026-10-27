@@ -1,10 +1,11 @@
 """Build the app: one self-contained HTML page.
 Outputs go to ../dist/: scrum-master-on-duty.html (artifact page, no doctype) and index.html (standalone file / GitHub Pages).
-The question bank and both Scrum Guide texts are embedded at build time, so rebuild after changing them."""
+The practice bank, six fixed exams, and both Scrum Guide texts are embedded at build time."""
 import json, re, sys, pathlib, subprocess, html as H
 d = pathlib.Path(__file__).parent
 G = d / "guide"
 BANK = d.parent / "data" / "questions.json"
+EXAM_BANK = d.parent / "data" / "exams.json"
 OUT = d.parent / "dist"
 OUT.mkdir(exist_ok=True)
 
@@ -86,8 +87,10 @@ assert len(TIP_EN) == len(TIP_DE) == len(tips), (len(TIP_EN), len(TIP_DE), len(t
 
 q = json.loads(BANK.read_text(encoding="utf-8"))
 data = {"questions": q["questions"], "topics": q["topics"]}
+exam_data = json.loads(EXAM_BANK.read_text(encoding="utf-8"))
 strip = lambda s: re.sub(r"^if \(typeof module.*$", "", s, flags=re.M)
 js = ("const QB = " + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + ";\n"
+      + "const EXAM_DATA = " + json.dumps(exam_data, ensure_ascii=False, separators=(",", ":")) + ";\n"
       + "const GUIDE = " + json.dumps({"en": en_html, "de": de_html}, ensure_ascii=False) + ";\n"
       + "const TIPS = " + json.dumps(tips, ensure_ascii=False) + ";\nconst TIP_EN = " + json.dumps(TIP_EN, ensure_ascii=False) + ";\nconst TIP_DE = " + json.dumps(TIP_DE, ensure_ascii=False) + ";\n"
       + strip((d / "engine.js").read_text(encoding="utf-8")) + "\n" + strip((d / "story.js").read_text(encoding="utf-8")) + "\n"

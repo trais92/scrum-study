@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "node src/run-build.js",
-    "test": "node src/tests/questions.js && npm run build && node src/tests/quotes.js && node src/tests/sim.js best && node src/tests/smoke.js desktop light && node src/tests/smoke.js phone light"
+    "test": "node src/tests/questions.js && node src/tests/exams.js && npm run build && node src/tests/quotes.js && node src/tests/sim.js best && node src/tests/smoke.js desktop light && node src/tests/smoke.js phone light"
   },
   "devDependencies": {
     "playwright": "1.55.1"
