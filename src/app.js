@@ -29,7 +29,7 @@ const EXAM_SETS = Array.from({ length: 6 }, (_, index) => {
   return { id: "exam-" + test, label: "Exam " + test, questions: EXAM_QUESTIONS.filter(q => q.examTest === test).sort((a, b) => a.examNr - b.examNr) };
 });
 const importedExamGroup = (topic, course, prefix) => ({
-  id: prefix,
+  id: prefix === "psm" ? "scrum-course-2" : "product-owner-course",
   label: course,
   exams: Array.from({ length: 6 }, (_, index) => {
     const test = index + 1;
@@ -37,6 +37,8 @@ const importedExamGroup = (topic, course, prefix) => ({
       id: `exam-${prefix}-${test}`,
       label: `${course} · Exam ${test}`,
       shortLabel: `Exam ${test}`,
+      pdfUrl: `downloads/exams/${prefix === "psm" ? "scrum-course-2" : "product-owner-course"}-exam-${test}.pdf`,
+      answerKeyUrl: `downloads/exams/${prefix === "psm" ? "scrum-course-2" : "product-owner-course"}-exam-${test}-answer-key.pdf`,
       questions: QS.filter(q => q.t === topic && q.sourceTest === test).sort((a, b) => a.sourceNr - b.sourceNr)
     };
   })
@@ -45,7 +47,13 @@ const EXAM_GROUPS = [
   {
     id: "scrum-course-1",
     label: "Scrum Course 1",
-    exams: EXAM_SETS.map(set => ({ ...set, shortLabel: set.label, label: `Scrum Course 1 · ${set.label}` }))
+    exams: EXAM_SETS.map((set, index) => ({
+      ...set,
+      shortLabel: set.label,
+      label: `Scrum Course 1 · ${set.label}`,
+      pdfUrl: `downloads/exams/scrum-course-1-exam-${index + 1}.pdf`,
+      answerKeyUrl: `downloads/exams/scrum-course-1-exam-${index + 1}-answer-key.pdf`
+    }))
   },
   importedExamGroup("psm", "Scrum Course 2", "psm"),
   importedExamGroup("po", "Product Owner Course", "po")
@@ -54,14 +62,17 @@ const COURSE_EXAMS = EXAM_GROUPS.flatMap(group => group.exams);
 const EXAM_BY_ID = Object.fromEntries(COURSE_EXAMS.map(exam => [exam.id, exam]));
 const ALL_EXAM_QUESTIONS = COURSE_EXAMS.flatMap(set => set.questions);
 function examTileHtml(exam, attr, index) {
-  return `<button class="exam-tile" type="button" ${attr}="${exam.id}">
-    <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(exam.shortLabel)}</b><small>${exam.questions.length} questions · Untimed</small></span><span class="exam-arrow" aria-hidden="true">→</span>
-  </button>`;
+  return `<div class="exam-card">
+    <button class="exam-tile" type="button" ${attr}="${exam.id}">
+      <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(exam.shortLabel)}</b><small>${exam.questions.length} questions · Untimed</small></span><span class="exam-arrow" aria-hidden="true">→</span>
+    </button>
+    <div class="exam-downloads"><a href="${exam.pdfUrl}" download="${exam.pdfUrl.split("/").pop()}" aria-label="Download ${esc(exam.label)} question PDF">Exam PDF</a><a href="${exam.answerKeyUrl}" download="${exam.answerKeyUrl.split("/").pop()}" aria-label="Download ${esc(exam.label)} answer key PDF">Answer key</a></div>
+  </div>`;
 }
 function examGroupsHtml(attr) {
-  return EXAM_GROUPS.map((group, index) => {
+  return EXAM_GROUPS.map(group => {
     const questionCount = group.exams.reduce((sum, exam) => sum + exam.questions.length, 0);
-    return `<details class="exam-group" ${index === 0 ? "open" : ""}>
+    return `<details class="exam-group">
       <summary><span>${esc(group.label)}</span><small>${group.exams.length} exams · ${questionCount} questions</small></summary>
       <div class="exam-grid">${group.exams.map((exam, examIndex) => examTileHtml(exam, attr, examIndex)).join("")}</div>
     </details>`;
@@ -70,7 +81,7 @@ function examGroupsHtml(attr) {
 function examBankTileHtml(attr) {
   return `<button class="exam-tile exam-bank" type="button" ${attr}="exam-bank">
     <span class="exam-number">↻</span><span class="exam-copy"><b>Question bank mock</b><small>Random 80 questions · Untimed</small></span><span class="exam-arrow" aria-hidden="true">→</span>
-  </button>`;
+  </button><p class="exam-note">The mock is randomized each time, so printable PDFs are available for the 18 fixed course exams.</p>`;
 }
 const ICON = {
   book: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 3h4.5a2 2 0 0 1 2 2v8.5a1.5 1.5 0 0 0-1.5-1.5H2zM14 3H9.5a2 2 0 0 0-1 .3"/><path d="M14 3v9H9a1.5 1.5 0 0 0-1.5 1.5"/></svg>',

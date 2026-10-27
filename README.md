@@ -13,14 +13,14 @@ Everything is in one file, `index.html`. Progress is saved only in your own brow
 
 ## Build
 
-The live page is `index.html` in the repo root, served by GitHub Pages from `main`. It is built from `src/`:
+The live page is `index.html` in the repo root, served by GitHub Pages from `main`. The page and printable exam PDFs are built from the source data:
 
 ```
-python3 src/build.py          # writes dist/index.html and dist/scrum-master-on-duty.html
-cp dist/index.html index.html # publish: commit and push to main
+npm run build                  # builds dist/index.html and the exam PDFs
+cp dist/index.html index.html  # refresh the GitHub Pages document
 ```
 
-Python 3.10 or newer, no packages needed. Open `dist/index.html` in a browser to try a build before publishing.
+The build needs Python 3.10 or newer, Node.js/npm, the pinned Playwright package, and Playwright Chromium. PDFs are written to `downloads/exams/` for GitHub Pages and copied into `dist/downloads/exams/` for local preview. Each fixed course exam has a black-and-white question paper and a separate answer key. The randomized question-bank mock has no fixed PDF because its questions change each time.
 
 ## Tests
 
@@ -31,7 +31,7 @@ npm ci
 npx playwright install chromium
 ```
 
-Run `npm test` to validate all question banks and course exam groupings, rebuild `dist/`, check the Guide quotes, simulate a game, and run browser smoke checks on desktop and phone-sized viewports.
+Run `npm test` to validate all question banks and course exam groupings, rebuild `dist/` and the PDFs, check the Guide quotes, simulate a game, and run browser smoke checks on desktop and phone-sized viewports.
 
 CI reports two separate checks:
 
@@ -50,6 +50,7 @@ CI reports two separate checks:
 | `data/questions.json` | The practice question bank, each answer with its Scrum Guide quote |
 | `data/exams.json` | Six fixed, 80-question Scrum Course 1 exam sets |
 | `data/imported/` | Product Owner (1,000) and Scrum Master (1,002) questions, each organized into six course exams |
+| `downloads/exams/` | Printable A4 question papers and separate answer keys for the 18 fixed exams |
 | `src/tests/` | Quote, game simulation, and Playwright checks |
 | `docs/` | Backlog and notes for working with agents in Delta |
 

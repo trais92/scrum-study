@@ -68,8 +68,15 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .exam-group summary small { margin-left: auto; color: var(--muted); font-size: 11px; font-weight: 600; text-align: right; }
 .exam-group .exam-grid { padding: 0 9px 9px; }
 .exam-random { display: grid; gap: 7px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.exam-note { margin: 0; color: var(--muted); font-size: 12px; }
+.exam-card { display: grid; gap: 4px; min-width: 0; }
 .exam-tile { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-width: 0; padding: 9px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); text-align: left; font: inherit; cursor: pointer; transition: border-color .15s, transform .15s, box-shadow .15s; }
 .exam-tile:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow); }
+.exam-card .exam-tile { width: 100%; }
+.exam-downloads { display: flex; gap: 5px; }
+.exam-downloads a { flex: 1; min-width: 0; padding: 4px 6px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); color: var(--accent-ink); font-size: 10.5px; font-weight: 700; text-align: center; text-decoration: none; }
+.exam-downloads a:hover { border-color: var(--accent); background: var(--accent-soft); }
+.exam-downloads a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .exam-number { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; background: var(--accent-soft); color: var(--accent-ink); font: 800 12px var(--f-mono); }
 .exam-copy { display: grid; gap: 3px; min-width: 0; }
 .exam-copy b { font-size: 13px; line-height: 1.2; }

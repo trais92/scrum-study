@@ -28,6 +28,15 @@ const OUT = shotsDir + "/app-";
   }
   await page.screenshot({ path: OUT + tag + "-home.png", fullPage: true }); await ov("home");
   if (await page.locator('#v-home [data-home^="exam-"]').count() !== 19) errs.push("HOME EXAM HIGHLIGHT does not show 18 course exams plus the question-bank mock");
+  const homeGroups = page.locator("#v-home .exam-group");
+  if (await homeGroups.count() !== 3 || await page.locator("#v-home .exam-group[open]").count()) errs.push("HOME COURSE GROUPS are not all folded by default");
+  await homeGroups.nth(0).locator("summary").click();
+  const examPdfDownload = page.waitForEvent("download");
+  await homeGroups.nth(0).locator(".exam-downloads a").nth(0).click();
+  if ((await examPdfDownload).suggestedFilename() !== "scrum-course-1-exam-1.pdf") errs.push("EXAM PDF download link is incorrect");
+  const keyPdfDownload = page.waitForEvent("download");
+  await homeGroups.nth(0).locator(".exam-downloads a").nth(1).click();
+  if ((await keyPdfDownload).suggestedFilename() !== "scrum-course-1-exam-1-answer-key.pdf") errs.push("ANSWER KEY PDF download link is incorrect");
   await page.click('#v-home [data-home="exam-1"]'); await page.waitForTimeout(300);
   if ((await page.locator("#pmain .qhead .mode").textContent()).trim() !== "Scrum Course 1 · Exam 1") errs.push("HOME SCRUM COURSE 1 EXAM 1 did not start");
   if (await page.locator("#pmain .qmap button").count() !== 80) errs.push("HOME EXAM 1 does not contain 80 questions");
@@ -88,8 +97,13 @@ const OUT = shotsDir + "/app-";
   const practiceTopics = await page.locator("#pmain .ptopic .nm").allTextContents();
   for (const [topic, label] of [["po", "Product Owner questions"], ["psm", "Scrum Master questions"]]) {
     if (!practiceTopics.includes(label)) errs.push(`TOPIC ${label} is missing`);
-    await page.click(`#pmain [data-topic="${topic}"]`); await page.waitForTimeout(250);
-    if ((await page.locator("#pmain .qmeta").textContent()).trim() !== label) errs.push(`TOPIC ${label} did not start`);
+    await page.click(`#pmain [data-topic="${topic}"]`);
+    await page.waitForTimeout(250);
+    const topicMeta = (await page.locator("#pmain .qmeta").textContent()).trim();
+    if (topicMeta !== label) {
+      const state = await page.evaluate(() => ({ hash: location.hash, view, mode: P && P.mode, label: P && P.label, count: P && P.items.length }));
+      errs.push(`TOPIC ${label} did not start (shown ${JSON.stringify(topicMeta)}, state ${JSON.stringify(state)})`);
+    }
     const sourceLabel = await page.evaluate(() => P.items[0].q.sourceLabel);
     if (!sourceLabel || !sourceLabel.startsWith("Udemy")) errs.push(`TOPIC ${label} lost its source label`);
     await page.click('#pmain [data-pact="quit"]'); await page.click('#pmain [data-pact="quityes"]'); await page.waitForTimeout(200);
@@ -97,6 +111,8 @@ const OUT = shotsDir + "/app-";
   await page.screenshot({ path: OUT + tag + "-practice-dash.png", fullPage: true }); await ov("pdash");
   // exam
   if (await page.locator('#pmain [data-p^="exam-"]').count() !== 19) errs.push("EXAM SELECTOR COUNT is not 19");
+  if (await page.locator("#pmain .exam-group").count() !== 3 || await page.locator("#pmain .exam-group[open]").count()) errs.push("PRACTICE COURSE GROUPS are not all folded by default");
+  await page.locator("#pmain .exam-group").first().locator("summary").click();
   await page.click('#pmain [data-p="exam-1"]'); await page.waitForTimeout(300);
   if (await page.locator('#pmain .qmap button').count() !== 80) errs.push("EXAM 1 does not contain 80 questions");
   if ((await page.locator('#pmain .qhead .mode').textContent()).trim() !== "Scrum Course 1 · Exam 1") errs.push("EXAM 1 title is missing");
