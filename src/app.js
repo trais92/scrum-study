@@ -419,8 +419,9 @@ function chatHtml(s) {
   return `<div class="qchat"><span class="lbl">Team chat</span>${linesHtml(s.filter(l => LOOK[l[0]]), false)}</div>`;
 }
 function pquoteHtml(q) {
-  const sec = q.examSource ? null : sectionIdsFor(q.r)[0];
-  const ref = q.examSource ? esc(q.r) : `Scrum Guide 2020 · ${esc(q.r)}`;
+  const external = q.sourceLabel || q.examSource;
+  const sec = external ? null : sectionIdsFor(q.r)[0];
+  const ref = q.sourceLabel ? esc(q.sourceLabel) : q.examSource ? esc(q.r) : `Scrum Guide 2020 · ${esc(q.r)}`;
   return `<div class="pquote"><span class="ref">${ref}</span>${(q.g || []).map(g => `<q>${esc(g)}</q>`).join("")}${sec ? `<button type="button" class="linkbtn" data-pact="readguide" data-sec="${sec}">Read this section in the Guide</button>` : ""}</div>`;
 }
 function renderPQ() {

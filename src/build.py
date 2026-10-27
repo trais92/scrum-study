@@ -6,6 +6,10 @@ d = pathlib.Path(__file__).parent
 G = d / "guide"
 BANK = d.parent / "data" / "questions.json"
 EXAM_BANK = d.parent / "data" / "exams.json"
+IMPORTED_BANKS = [
+    (d.parent / "data" / "imported" / "pspo_1000_fragen.json", "po", "Product Owner questions", "Udemy · Product Owner"),
+    (d.parent / "data" / "imported" / "psm_1000_fragen.json", "psm", "Scrum Master questions", "Udemy · Scrum Master"),
+]
 OUT = d.parent / "dist"
 OUT.mkdir(exist_ok=True)
 
@@ -86,7 +90,26 @@ TIP_DE = ["Scrum Master:in", "Product Owner:in", "das Product Backlog", "Scrum T
 assert len(TIP_EN) == len(TIP_DE) == len(tips), (len(TIP_EN), len(TIP_DE), len(tips))
 
 q = json.loads(BANK.read_text(encoding="utf-8"))
-data = {"questions": q["questions"], "topics": q["topics"]}
+topics = dict(q["topics"])
+imported_questions = []
+for path, topic, topic_name, source_label in IMPORTED_BANKS:
+    topics[topic] = topic_name
+    for source in json.loads(path.read_text(encoding="utf-8")):
+        answers = source["answers"]
+        imported_questions.append({
+            "id": f"imported-{topic}-{source['id']}",
+            "t": topic,
+            "q": source["question"],
+            "o": [answer["text"] for answer in answers],
+            "a": [index for index, answer in enumerate(answers) if answer["correct"]],
+            "x": source.get("explanation") or "",
+            "r": source.get("section") or topic_name,
+            "g": [],
+            "sourceLabel": source_label,
+            "sourceTest": source.get("test"),
+            "sourceNr": source.get("nr"),
+        })
+data = {"questions": q["questions"] + imported_questions, "topics": topics}
 exam_data = json.loads(EXAM_BANK.read_text(encoding="utf-8"))
 strip = lambda s: re.sub(r"^if \(typeof module.*$", "", s, flags=re.M)
 js = ("const QB = " + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + ";\n"

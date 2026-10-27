@@ -3,7 +3,8 @@
 A free PSM I study kit that runs in any browser, with no sign-up:
 
 - **Scrum Guide 2020**: the full text in English and in the official German translation, searchable, with explained terms.
-- **Exam practice**: smart rounds, rounds by topic, your mistakes, six fixed 80-question exams, and a random 80-question mock from the practice bank.
+- **Practice**: smart rounds, rounds by topic, mistakes review, plus separate Product Owner and Scrum Master question banks.
+- **Exams**: six fixed 80-question exams and a random 80-question mock from the practice bank.
 - **Game**: three Sprints as the Scrum Master of a small web team, with an animated office and a "Watch a Sprint" mode.
 
 Open it: https://trais92.github.io/scrum-study/
@@ -30,7 +31,7 @@ npm ci
 npx playwright install chromium
 ```
 
-Run `npm test` to validate the question bank and six exam sets, rebuild `dist/`, check the Guide quotes, simulate a game, and run browser smoke checks on desktop and phone-sized viewports.
+Run `npm test` to validate all question banks and six exam sets, rebuild `dist/`, check the Guide quotes, simulate a game, and run browser smoke checks on desktop and phone-sized viewports.
 
 CI reports two separate checks:
 
@@ -48,6 +49,7 @@ CI reports two separate checks:
 | `src/guide/` | Scrum Guide 2020: English, official German (from the PDF) and term explanations |
 | `data/questions.json` | The practice question bank, each answer with its Scrum Guide quote |
 | `data/exams.json` | Six fixed, 80-question exam sets |
+| `data/imported/` | Separate Product Owner (1,000) and Scrum Master (1,002) question banks |
 | `src/tests/` | Quote, game simulation, and Playwright checks |
 | `docs/` | Backlog and notes for working with agents in Delta |
 
@@ -57,4 +59,4 @@ The state before the Delta setup is kept on the branch `pre-delta-2026-10-21`.
 
 The Scrum Guide 2020 © Ken Schwaber and Jeff Sutherland, offered under the [Creative Commons Attribution Share-Alike 4.0 licence](https://creativecommons.org/licenses/by-sa/4.0/). Original text: [scrumguides.org](https://scrumguides.org/). The German text is the official translation by the GermanScrumTranslators (version 3.5) and is unchanged. The explanations added to underlined terms are not part of the Scrum Guide.
 
-The practice questions and the game are original study material based on the Guide. They are not official Scrum.org exam questions. This adapted material is shared under the same CC BY-SA 4.0 licence. The six fixed exam sets in `data/exams.json` were supplied separately from a learning-platform export and are not part of that original question-bank licence statement.
+The original practice questions and the game are study material based on the Guide. They are not official Scrum.org exam questions. This adapted material is shared under the same CC BY-SA 4.0 licence. The six fixed exam sets in `data/exams.json` and the two imported question banks in `data/imported/` were supplied separately from learning-platform exports and are not part of that original question-bank licence statement.

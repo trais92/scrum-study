@@ -18,6 +18,14 @@ const OUT = shotsDir + "/app-";
   const ov = async n => { const o = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]); if (o[0] > o[1] + 1) errs.push(`OVERFLOW ${n} ${o}`); };
   await page.goto(appUrl);
   await page.waitForTimeout(1500);
+  const bankCounts = await page.evaluate(() => ({
+    total: QB.questions.length,
+    po: QB.questions.filter(question => question.t === "po").length,
+    psm: QB.questions.filter(question => question.t === "psm").length
+  }));
+  if (bankCounts.total !== 2111 || bankCounts.po !== 1000 || bankCounts.psm !== 1002) {
+    errs.push(`IMPORTED BANK COUNTS are wrong: ${JSON.stringify(bankCounts)}`);
+  }
   await page.screenshot({ path: OUT + tag + "-home.png", fullPage: true }); await ov("home");
   if (await page.locator('#v-home [data-home^="exam-"]').count() !== 7) errs.push("HOME EXAM HIGHLIGHT does not show all seven exams");
   await page.click('#v-home [data-home="exam-1"]'); await page.waitForTimeout(300);
@@ -67,6 +75,15 @@ const OUT = shotsDir + "/app-";
   await page.click('.nav a[data-nav="practice"]'); await page.waitForTimeout(300);
   await page.click('#pmain [data-pact="quit"]').catch(() => {}); await page.click('#pmain [data-pact="quityes"]').catch(() => {});
   await page.waitForTimeout(300);
+  const practiceTopics = await page.locator("#pmain .ptopic .nm").allTextContents();
+  for (const [topic, label] of [["po", "Product Owner questions"], ["psm", "Scrum Master questions"]]) {
+    if (!practiceTopics.includes(label)) errs.push(`TOPIC ${label} is missing`);
+    await page.click(`#pmain [data-topic="${topic}"]`); await page.waitForTimeout(250);
+    if ((await page.locator("#pmain .qmeta").textContent()).trim() !== label) errs.push(`TOPIC ${label} did not start`);
+    const sourceLabel = await page.evaluate(() => P.items[0].q.sourceLabel);
+    if (!sourceLabel || !sourceLabel.startsWith("Udemy")) errs.push(`TOPIC ${label} lost its source label`);
+    await page.click('#pmain [data-pact="quit"]'); await page.click('#pmain [data-pact="quityes"]'); await page.waitForTimeout(200);
+  }
   await page.screenshot({ path: OUT + tag + "-practice-dash.png", fullPage: true }); await ov("pdash");
   // exam
   if (await page.locator('#pmain [data-p^="exam-"]').count() !== 7) errs.push("EXAM SELECTOR COUNT is not 7");
