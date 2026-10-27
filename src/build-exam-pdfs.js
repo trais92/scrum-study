@@ -46,14 +46,11 @@ function pageHtml({ course, examNumber, questions, answerKey = false }) {
     <p class="meta">${questions.length} questions <span>·</span> Untimed <span>·</span> ${answerKey ? "Answer key" : "Question paper"}</p>
   </header>`;
   const content = answerKey
-    ? `<p class="instructions">Match the answer letters to the choices shown on the question paper. Multi-answer items list every correct choice.</p>
-       <div class="key-list">${questions.map(question => {
+    ? `<div class="key-list">${questions.map(question => {
          const answers = question.correct.map(index => `<span class="answer-key">${String.fromCharCode(65 + index)}</span> <span>${escapeHtml(question.answers[index])}</span>`);
          return `<section class="key-item"><b>Question ${question.number}</b><div>${answers.join("<br>")}</div></section>`;
        }).join("")}</div>`
-    : `<div class="candidate"><span>Name <i></i></span><span>Date <i></i></span><span>Score <i></i> / ${questions.length}</span></div>
-       <p class="instructions">Mark your answer beside each choice. Each question states how many answers to select. For multi-answer items, select exactly the number shown.</p>
-       <main class="questions">${questions.map(question => `<section class="question">
+    : `<main class="questions">${questions.map(question => `<section class="question">
          <div class="question-heading"><b>Question ${question.number}</b><span>${question.correct.length > 1 ? `Choose ${question.correct.length} answers` : "Choose 1 answer"}</span></div>
          <p class="stem">${escapeHtml(question.text)}</p>
          <ul class="options">${question.answers.map((answer, index) => `<li><span class="box" aria-hidden="true"></span><b>${String.fromCharCode(65 + index)}.</b><span>${escapeHtml(answer)}</span></li>`).join("")}</ul>
@@ -70,10 +67,6 @@ function pageHtml({ course, examNumber, questions, answerKey = false }) {
     h1 { margin: 0; font-size: 22pt; line-height: 1.15; }
     .meta { margin: 2mm 0 0; font-size: 9pt; font-weight: 700; }
     .meta span { padding: 0 2mm; }
-    .candidate { display: grid; grid-template-columns: 1.5fr 1fr auto; gap: 8mm; margin: 0 0 6mm; }
-    .candidate span { display: flex; align-items: baseline; gap: 3mm; white-space: nowrap; }
-    .candidate i { display: block; flex: 1; min-width: 15mm; border-bottom: 1px solid #333; }
-    .instructions { margin: 0 0 7mm; padding: 3mm 4mm; border: 1px solid #777; font-size: 9pt; }
     .question { break-inside: avoid; padding: 4mm 0; border-bottom: 1px solid #aaa; }
     .question-heading { display: flex; justify-content: space-between; gap: 5mm; align-items: baseline; }
     .question-heading b { font-size: 11pt; }
@@ -91,7 +84,7 @@ function pageHtml({ course, examNumber, questions, answerKey = false }) {
     @media print {
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       html { color: #000; background: #fff; }
-      .question, .key-list li { border-color: #777; }
+      .question, .key-item { border-color: #777; }
     }
   </style></head><body>${titleBlock}${content}</body></html>`;
 }

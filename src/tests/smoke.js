@@ -99,7 +99,7 @@ const OUT = shotsDir + "/app-";
     if (!practiceTopics.includes(label)) errs.push(`TOPIC ${label} is missing`);
     await page.click(`#pmain [data-topic="${topic}"]`);
     await page.waitForTimeout(250);
-    const topicMeta = (await page.locator("#pmain .qmeta").textContent()).trim();
+    const topicMeta = (await page.locator("#pmain .qmeta > span").first().textContent()).trim();
     if (topicMeta !== label) {
       const state = await page.evaluate(() => ({ hash: location.hash, view, mode: P && P.mode, label: P && P.label, count: P && P.items.length }));
       errs.push(`TOPIC ${label} did not start (shown ${JSON.stringify(topicMeta)}, state ${JSON.stringify(state)})`);
