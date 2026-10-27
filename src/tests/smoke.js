@@ -141,6 +141,28 @@ const OUT = shotsDir + "/app-";
   if (!(await page.locator("#pmain").innerText()).includes("1 of 80 correct")) errs.push("EXAM 1 did not score the keyed first answer as correct");
   await page.screenshot({ path: OUT + tag + "-exam-res.png" });
   await page.click('#pmain [data-pact="home"]'); await page.waitForTimeout(200);
+  await page.evaluate(() => {
+    const lastAttempt = pstore.exams[pstore.exams.length - 1];
+    if (lastAttempt) delete lastAttempt.examId;
+    psave();
+  });
+  await page.locator("#pmain .exam-group").first().locator("summary").click();
+  let examStatusTile = page.locator('#pmain [data-p="exam-1"]');
+  if (!(await examStatusTile.getAttribute("class")).includes("is-failed") || !(await examStatusTile.innerText()).includes("Failed")) errs.push("FAILED EXAM is not marked red");
+  await page.evaluate(() => {
+    pstore.exams.push({ date: "today", label: "Scrum Course 1 · Exam 1", examId: "exam-1", score: 90 });
+    psave(); renderPractice();
+  });
+  await page.locator("#pmain .exam-group").first().locator("summary").click();
+  examStatusTile = page.locator('#pmain [data-p="exam-1"]');
+  if (!(await examStatusTile.getAttribute("class")).includes("is-passed") || !(await examStatusTile.innerText()).includes("Passed · 90%")) errs.push("PASSED EXAM is not marked green");
+  await page.evaluate(() => {
+    pstore.exams.push({ date: "today", label: "Scrum Course 1 · Exam 1", examId: "exam-1", score: 20 });
+    psave(); renderPractice();
+  });
+  await page.locator("#pmain .exam-group").first().locator("summary").click();
+  examStatusTile = page.locator('#pmain [data-p="exam-1"]');
+  if (!(await examStatusTile.getAttribute("class")).includes("is-passed") || !(await examStatusTile.innerText()).includes("Passed · 90%")) errs.push("PASSED EXAM lost its green status after a later failure");
   await page.click('#pmain [data-p="exam-bank"]'); await page.waitForTimeout(300);
   if ((await page.locator('#pmain .qhead .mode').textContent()).trim() !== "Exam 7 · Question bank") errs.push("QUESTION BANK MOCK title is missing");
   if (await page.locator('#pmain .qmap button').count() !== 80) errs.push("EXAM 7 does not contain 80 questions");

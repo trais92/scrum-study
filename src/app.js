@@ -74,10 +74,20 @@ function examTimerChoiceHtml(id) {
     <span><strong>Timed exams</strong><small>45 seconds per question · 60 minutes for 80 questions</small></span>
   </label>`;
 }
+function savedExamStatus(examId, label) {
+  const legacyLabels = examId === "exam-bank" ? [label, "Question bank mock"] : [label];
+  const attempts = pstore.exams.filter(result => result.examId === examId || (!result.examId && legacyLabels.includes(result.label)));
+  if (!attempts.length) return null;
+  const best = Math.max(...attempts.map(result => result.score));
+  return best >= 85
+    ? { state: "passed", text: `Passed · ${best}%` }
+    : { state: "failed", text: `Failed · ${attempts[attempts.length - 1].score}%` };
+}
 function examTileHtml(exam, attr, index) {
+  const status = savedExamStatus(exam.id, exam.label);
   return `<div class="exam-card">
-    <button class="exam-tile" type="button" ${attr}="${exam.id}">
-      <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(exam.shortLabel)}</b><small data-exam-time="${exam.questions.length}">${exam.questions.length} questions · ${pstore.timedExams ? examDurationLabel(exam.questions.length) : "Untimed"}</small></span><span class="exam-arrow" aria-hidden="true">→</span>
+    <button class="exam-tile${status ? ` is-${status.state}` : ""}" type="button" ${attr}="${exam.id}">
+      <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(exam.shortLabel)}</b><small data-exam-time="${exam.questions.length}">${exam.questions.length} questions · ${pstore.timedExams ? examDurationLabel(exam.questions.length) : "Untimed"}</small>${status ? `<small class="exam-result ${status.state}">${esc(status.text)}</small>` : ""}</span><span class="exam-arrow" aria-hidden="true">→</span>
     </button>
     <div class="exam-downloads"><a href="${exam.pdfUrl}" download="${exam.pdfUrl.split("/").pop()}" aria-label="Download ${esc(exam.label)} question PDF">Exam PDF</a><a href="${exam.answerKeyUrl}" download="${exam.answerKeyUrl.split("/").pop()}" aria-label="Download ${esc(exam.label)} answer key PDF">Answer key</a></div>
   </div>`;
@@ -92,8 +102,9 @@ function examGroupsHtml(attr) {
   }).join("");
 }
 function examBankTileHtml(attr) {
-  return `<button class="exam-tile exam-bank" type="button" ${attr}="exam-bank">
-    <span class="exam-number">↻</span><span class="exam-copy"><b>Question bank mock</b><small data-exam-time="80">Random 80 questions · ${pstore.timedExams ? examDurationLabel(80) : "Untimed"}</small></span><span class="exam-arrow" aria-hidden="true">→</span>
+  const status = savedExamStatus("exam-bank", "Exam 7 · Question bank");
+  return `<button class="exam-tile exam-bank${status ? ` is-${status.state}` : ""}" type="button" ${attr}="exam-bank">
+    <span class="exam-number">↻</span><span class="exam-copy"><b>Question bank mock</b><small data-exam-time="80">Random 80 questions · ${pstore.timedExams ? examDurationLabel(80) : "Untimed"}</small>${status ? `<small class="exam-result ${status.state}">${esc(status.text)}</small>` : ""}</span><span class="exam-arrow" aria-hidden="true">→</span>
   </button><p class="exam-note">The mock is randomized each time, so printable PDFs are available for the 18 fixed course exams.</p>`;
 }
 const ICON = {
@@ -581,7 +592,7 @@ function finishExam() {
   clearExamTimer();
   P.items.forEach(it => { if (it.picked.length) record(it.q.id, sameSet(it.picked, it.q.a)); });
   const ok = P.items.filter(it => sameSet(it.picked, it.q.a)).length;
-  const d = new Date(); pstore.exams.push({ date: d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }), score: Math.round(ok / P.items.length * 100), label: P.label });
+  const d = new Date(); pstore.exams.push({ date: d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }), score: Math.round(ok / P.items.length * 100), label: P.label, examId: P.examId });
   P.done = true; saveExam();
   showPResults(true);
 }

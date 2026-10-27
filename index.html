@@ -392,7 +392,7 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .welcome h1 { font-family: var(--f-display); font-weight: 900; font-size: clamp(38px, 5.6vw, 64px); line-height: .9; margin: 0; text-transform: uppercase; letter-spacing: .01em; }
 .welcome h1 span { color: var(--accent); }
 .welcome p { margin: 0; font-size: 16px; color: var(--muted); max-width: 640px; }
-.home-main { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: 16px; align-items: start; }
+.home-main { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 16px; align-items: start; }
 .home-left { display: grid; gap: 14px; min-width: 0; }
 .entry { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 20px; display: grid; gap: 14px; align-content: start; overflow: hidden; }
 .entry h2 { margin: 0; font-family: var(--f-display); font-weight: 900; font-size: 30px; line-height: 1; text-transform: uppercase; letter-spacing: .02em; display: flex; align-items: center; gap: 10px; }
@@ -430,7 +430,7 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .exam-random { display: grid; gap: 7px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
 .exam-note { margin: 0; color: var(--muted); font-size: 12px; }
 .exam-card { display: grid; gap: 4px; min-width: 0; }
-.exam-tile { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-width: 0; padding: 9px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); text-align: left; font: inherit; cursor: pointer; transition: border-color .15s, transform .15s, box-shadow .15s; }
+.exam-tile { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-width: 0; min-height: 62px; padding: 11px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); text-align: left; font: inherit; cursor: pointer; transition: border-color .15s, transform .15s, box-shadow .15s; }
 .exam-tile:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow); }
 .exam-card .exam-tile { width: 100%; }
 .exam-downloads { display: flex; gap: 5px; }
@@ -445,6 +445,15 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .exam-bank { border-color: var(--ink); background: var(--ink); color: var(--panel); }
 .exam-bank .exam-number { background: var(--accent); }
 .exam-bank .exam-copy small { color: inherit; opacity: .74; }
+.exam-tile.is-passed { border-color: var(--good); background: var(--good-soft); color: var(--ink); }
+.exam-tile.is-failed { border-color: var(--bad); background: var(--bad-soft); color: var(--ink); }
+.exam-tile.is-passed .exam-number { background: var(--good); color: var(--panel); }
+.exam-tile.is-failed .exam-number { background: var(--bad); color: var(--panel); }
+.exam-result { font-size: 10.5px !important; font-weight: 800; }
+.exam-result.passed { color: var(--good); }
+.exam-result.failed { color: var(--bad); }
+.exam-bank .exam-copy .exam-result.passed { color: var(--good); opacity: 1; }
+.exam-bank .exam-copy .exam-result.failed { color: var(--bad); opacity: 1; }
 .exam-status { flex: none; padding: 4px 8px; border-radius: 99px; font: 700 11px var(--f-mono); }
 .exam-untimed { background: var(--good-soft); color: var(--good); }
 .exam-timer { background: var(--accent-soft); color: var(--accent-ink); font-variant-numeric: tabular-nums; }
@@ -3078,10 +3087,20 @@ function examTimerChoiceHtml(id) {
     <span><strong>Timed exams</strong><small>45 seconds per question · 60 minutes for 80 questions</small></span>
   </label>`;
 }
+function savedExamStatus(examId, label) {
+  const legacyLabels = examId === "exam-bank" ? [label, "Question bank mock"] : [label];
+  const attempts = pstore.exams.filter(result => result.examId === examId || (!result.examId && legacyLabels.includes(result.label)));
+  if (!attempts.length) return null;
+  const best = Math.max(...attempts.map(result => result.score));
+  return best >= 85
+    ? { state: "passed", text: `Passed · ${best}%` }
+    : { state: "failed", text: `Failed · ${attempts[attempts.length - 1].score}%` };
+}
 function examTileHtml(exam, attr, index) {
+  const status = savedExamStatus(exam.id, exam.label);
   return `<div class="exam-card">
-    <button class="exam-tile" type="button" ${attr}="${exam.id}">
-      <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(exam.shortLabel)}</b><small data-exam-time="${exam.questions.length}">${exam.questions.length} questions · ${pstore.timedExams ? examDurationLabel(exam.questions.length) : "Untimed"}</small></span><span class="exam-arrow" aria-hidden="true">→</span>
+    <button class="exam-tile${status ? ` is-${status.state}` : ""}" type="button" ${attr}="${exam.id}">
+      <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(exam.shortLabel)}</b><small data-exam-time="${exam.questions.length}">${exam.questions.length} questions · ${pstore.timedExams ? examDurationLabel(exam.questions.length) : "Untimed"}</small>${status ? `<small class="exam-result ${status.state}">${esc(status.text)}</small>` : ""}</span><span class="exam-arrow" aria-hidden="true">→</span>
     </button>
     <div class="exam-downloads"><a href="${exam.pdfUrl}" download="${exam.pdfUrl.split("/").pop()}" aria-label="Download ${esc(exam.label)} question PDF">Exam PDF</a><a href="${exam.answerKeyUrl}" download="${exam.answerKeyUrl.split("/").pop()}" aria-label="Download ${esc(exam.label)} answer key PDF">Answer key</a></div>
   </div>`;
@@ -3096,8 +3115,9 @@ function examGroupsHtml(attr) {
   }).join("");
 }
 function examBankTileHtml(attr) {
-  return `<button class="exam-tile exam-bank" type="button" ${attr}="exam-bank">
-    <span class="exam-number">↻</span><span class="exam-copy"><b>Question bank mock</b><small data-exam-time="80">Random 80 questions · ${pstore.timedExams ? examDurationLabel(80) : "Untimed"}</small></span><span class="exam-arrow" aria-hidden="true">→</span>
+  const status = savedExamStatus("exam-bank", "Exam 7 · Question bank");
+  return `<button class="exam-tile exam-bank${status ? ` is-${status.state}` : ""}" type="button" ${attr}="exam-bank">
+    <span class="exam-number">↻</span><span class="exam-copy"><b>Question bank mock</b><small data-exam-time="80">Random 80 questions · ${pstore.timedExams ? examDurationLabel(80) : "Untimed"}</small>${status ? `<small class="exam-result ${status.state}">${esc(status.text)}</small>` : ""}</span><span class="exam-arrow" aria-hidden="true">→</span>
   </button><p class="exam-note">The mock is randomized each time, so printable PDFs are available for the 18 fixed course exams.</p>`;
 }
 const ICON = {
@@ -3585,7 +3605,7 @@ function finishExam() {
   clearExamTimer();
   P.items.forEach(it => { if (it.picked.length) record(it.q.id, sameSet(it.picked, it.q.a)); });
   const ok = P.items.filter(it => sameSet(it.picked, it.q.a)).length;
-  const d = new Date(); pstore.exams.push({ date: d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }), score: Math.round(ok / P.items.length * 100), label: P.label });
+  const d = new Date(); pstore.exams.push({ date: d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }), score: Math.round(ok / P.items.length * 100), label: P.label, examId: P.examId });
   P.done = true; saveExam();
   showPResults(true);
 }
