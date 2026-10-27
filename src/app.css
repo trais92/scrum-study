@@ -58,6 +58,16 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .exam-count { flex: none; padding: 6px 10px; border-radius: 99px; background: var(--ink); color: var(--panel); font: 700 12px var(--f-mono); white-space: nowrap; }
 .exam-entry > p { margin-top: -4px; color: var(--muted); font-size: 14px; }
 .exam-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.exam-groups { display: grid; gap: 9px; }
+.exam-group { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--panel) 82%, var(--accent-soft)); }
+.exam-group[open] { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.exam-group summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 13px; color: var(--ink); font-weight: 800; cursor: pointer; list-style: none; }
+.exam-group summary::-webkit-details-marker { display: none; }
+.exam-group summary::after { content: "+"; color: var(--accent-ink); font: 700 18px var(--f-mono); }
+.exam-group[open] summary::after { content: "−"; }
+.exam-group summary small { margin-left: auto; color: var(--muted); font-size: 11px; font-weight: 600; text-align: right; }
+.exam-group .exam-grid { padding: 0 9px 9px; }
+.exam-random { display: grid; gap: 7px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
 .exam-tile { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-width: 0; padding: 9px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); text-align: left; font: inherit; cursor: pointer; transition: border-color .15s, transform .15s, box-shadow .15s; }
 .exam-tile:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow); }
 .exam-number { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; background: var(--accent-soft); color: var(--accent-ink); font: 800 12px var(--f-mono); }
@@ -68,6 +78,7 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .exam-bank { border-color: var(--ink); background: var(--ink); color: var(--panel); }
 .exam-bank .exam-number { background: var(--accent); }
 .exam-bank .exam-copy small { color: inherit; opacity: .74; }
+.exam-untimed { flex: none; padding: 4px 8px; border-radius: 99px; background: var(--good-soft); color: var(--good); font: 700 11px var(--f-mono); }
 .bigsearch { display: flex; align-items: center; gap: 8px; border: 2px solid var(--ink); border-radius: 12px; background: var(--panel); padding: 4px 4px 4px 12px; }
 .bigsearch:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 .bigsearch svg { width: 20px; height: 20px; flex: none; color: var(--muted); }
@@ -179,8 +190,6 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .qhead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .qhead .mode { font-weight: 700; }
 .qhead .sp { flex: 1; }
-.qtimer { font-family: var(--f-mono); font-weight: 700; font-size: 18px; padding: 3px 10px; border-radius: 8px; background: var(--panel-2); }
-.qtimer.low { background: var(--bad-soft); color: var(--bad); }
 .qbar { height: 6px; border-radius: 99px; background: var(--bg-2); overflow: hidden; }
 .qbar i { display: block; height: 100%; background: var(--accent); transition: width .35s; }
 .qtext { font-size: 20px; font-weight: 700; line-height: 1.35; margin: 0; }
@@ -391,7 +400,7 @@ a.primary { text-decoration: none; }
   .qhead .mode { grid-column: 1; }
   .qhead .hint { grid-column: 1; grid-row: 2; }
   .qhead .sp { display: none; }
-  .qhead .qtimer, .qhead [data-pact="quit"] { grid-row: 1 / span 2; }
+  .qhead .exam-untimed, .qhead [data-pact="quit"] { grid-row: 1 / span 2; }
   .qnav .sp { display: none; }
   .qnav .primary { order: -1; flex: 1 1 100%; }
   .qnav .pbtn { flex: 1 1 auto; }

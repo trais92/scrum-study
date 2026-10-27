@@ -2,16 +2,17 @@ const fs = require("fs");
 const path = require("path");
 
 const banks = [
-  ["pspo_1000_fragen.json", 1000, "Product Owner"],
-  ["psm_1000_fragen.json", 1002, "Scrum Master"]
+  ["pspo_1000_fragen.json", 1000, "Product Owner", [179, 181, 180, 180, 180, 100]],
+  ["psm_1000_fragen.json", 1002, "Scrum Master", [180, 181, 180, 181, 180, 100]]
 ];
 const issues = [];
 let typeCountMismatches = 0;
 
-for (const [file, expectedCount, label] of banks) {
+for (const [file, expectedCount, label, expectedTests] of banks) {
   const filePath = path.join(__dirname, "../../data/imported", file);
   const questions = JSON.parse(fs.readFileSync(filePath, "utf8"));
   const ids = new Set();
+  const tests = new Map();
 
   if (!Array.isArray(questions)) {
     issues.push(`${label}: expected an array of questions`);
@@ -33,6 +34,15 @@ for (const [file, expectedCount, label] of banks) {
       issues.push(`${name}: id "${question.id}" is duplicated`);
     } else {
       ids.add(String(question.id));
+    }
+    if (!Number.isInteger(question.test) || question.test < 1 || question.test > 6 ||
+        !Number.isInteger(question.nr) || question.nr < 1) {
+      issues.push(`${name}: test and nr must identify one of six course exams`);
+    } else {
+      const numbers = tests.get(question.test) || new Set();
+      if (numbers.has(question.nr)) issues.push(`${name}: exam ${question.test} repeats question number ${question.nr}`);
+      numbers.add(question.nr);
+      tests.set(question.test, numbers);
     }
     if (typeof question.question !== "string" || !question.question.trim()) {
       issues.push(`${name}: question must be nonblank`);
@@ -76,6 +86,12 @@ for (const [file, expectedCount, label] of banks) {
     if ((question.type === "multiple-choice" && flagged.length !== 1) ||
         (question.type === "multi-select" && flagged.length < 2)) typeCountMismatches++;
   }
+  for (let test = 1; test <= 6; test++) {
+    const found = tests.get(test)?.size || 0;
+    if (found !== expectedTests[test - 1]) {
+      issues.push(`${label} exam ${test}: expected ${expectedTests[test - 1]} questions, found ${found}`);
+    }
+  }
 }
 
 if (issues.length) {
@@ -83,7 +99,7 @@ if (issues.length) {
   for (const issue of issues) console.error(`- ${issue}`);
   process.exitCode = 1;
 } else {
-  console.log("Imported question validation passed (1,000 Product Owner and 1,002 Scrum Master questions).");
+  console.log("Imported question validation passed (six numbered exams each for Product Owner and Scrum Master).");
   if (typeCountMismatches) {
     console.log(`Note: ${typeCountMismatches} source type labels do not match the number of keyed answers; keyed answers are retained as supplied.`);
   }

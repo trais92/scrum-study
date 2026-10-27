@@ -27,12 +27,22 @@ const OUT = shotsDir + "/app-";
     errs.push(`IMPORTED BANK COUNTS are wrong: ${JSON.stringify(bankCounts)}`);
   }
   await page.screenshot({ path: OUT + tag + "-home.png", fullPage: true }); await ov("home");
-  if (await page.locator('#v-home [data-home^="exam-"]').count() !== 7) errs.push("HOME EXAM HIGHLIGHT does not show all seven exams");
+  if (await page.locator('#v-home [data-home^="exam-"]').count() !== 19) errs.push("HOME EXAM HIGHLIGHT does not show 18 course exams plus the question-bank mock");
   await page.click('#v-home [data-home="exam-1"]'); await page.waitForTimeout(300);
-  if ((await page.locator("#pmain .qhead .mode").textContent()).trim() !== "Exam 1") errs.push("HOME EXAM 1 did not start");
+  if ((await page.locator("#pmain .qhead .mode").textContent()).trim() !== "Scrum Course 1 · Exam 1") errs.push("HOME SCRUM COURSE 1 EXAM 1 did not start");
   if (await page.locator("#pmain .qmap button").count() !== 80) errs.push("HOME EXAM 1 does not contain 80 questions");
+  if (await page.locator("#pmain .exam-untimed").textContent() !== "Untimed" || await page.locator("#pmain #qtimer").count()) errs.push("HOME EXAM 1 is not untimed");
   await page.click('#pmain [data-pact="quit"]'); await page.click('#pmain [data-pact="quityes"]'); await page.waitForTimeout(200);
   await page.click(".brand"); await page.waitForTimeout(300);
+  for (const [groupIndex, examId, count, label] of [[1, "exam-psm-1", 180, "Scrum Course 2"], [2, "exam-po-1", 179, "Product Owner Course"]]) {
+    await page.locator("#v-home .exam-group").nth(groupIndex).locator("summary").click();
+    await page.click(`#v-home [data-home="${examId}"]`); await page.waitForTimeout(250);
+    if ((await page.locator("#pmain .qhead .mode").textContent()).trim() !== `${label} · Exam 1`) errs.push(`${label} exam did not start with its course label`);
+    if (await page.locator("#pmain .qmap button").count() !== count) errs.push(`${label} exam 1 expected ${count} questions`);
+    if (await page.locator("#pmain .exam-untimed").count() !== 1) errs.push(`${label} exam is not untimed`);
+    await page.click('#pmain [data-pact="quit"]'); await page.click('#pmain [data-pact="quityes"]'); await page.waitForTimeout(200);
+    await page.click(".brand"); await page.waitForTimeout(200);
+  }
   // guide search
   await page.fill("#hq", "Definition of Done"); await page.press("#hq", "Enter");
   await page.waitForTimeout(600);
@@ -86,10 +96,11 @@ const OUT = shotsDir + "/app-";
   }
   await page.screenshot({ path: OUT + tag + "-practice-dash.png", fullPage: true }); await ov("pdash");
   // exam
-  if (await page.locator('#pmain [data-p^="exam-"]').count() !== 7) errs.push("EXAM SELECTOR COUNT is not 7");
+  if (await page.locator('#pmain [data-p^="exam-"]').count() !== 19) errs.push("EXAM SELECTOR COUNT is not 19");
   await page.click('#pmain [data-p="exam-1"]'); await page.waitForTimeout(300);
   if (await page.locator('#pmain .qmap button').count() !== 80) errs.push("EXAM 1 does not contain 80 questions");
-  if ((await page.locator('#pmain .qhead .mode').textContent()).trim() !== "Exam 1") errs.push("EXAM 1 title is missing");
+  if ((await page.locator('#pmain .qhead .mode').textContent()).trim() !== "Scrum Course 1 · Exam 1") errs.push("EXAM 1 title is missing");
+  if (await page.locator("#pmain .exam-untimed").textContent() !== "Untimed" || await page.locator("#pmain #qtimer").count()) errs.push("EXAM 1 displays a timer");
   const firstExamQuestion = examData.find(question => question.test === 1 && question.nr === 1);
   for (const [index, answer] of firstExamQuestion.answers.entries()) if (answer.correct) await page.click(`#pmain [data-oi="${index}"]`);
   await page.screenshot({ path: OUT + tag + "-exam.png", fullPage: mode === "phone" }); await ov("exam");
@@ -98,8 +109,9 @@ const OUT = shotsDir + "/app-";
   await page.screenshot({ path: OUT + tag + "-exam-res.png" });
   await page.click('#pmain [data-pact="home"]'); await page.waitForTimeout(200);
   await page.click('#pmain [data-p="exam-bank"]'); await page.waitForTimeout(300);
-  if ((await page.locator('#pmain .qhead .mode').textContent()).trim() !== "Exam 7 · Question bank") errs.push("EXAM 7 title is missing");
+  if ((await page.locator('#pmain .qhead .mode').textContent()).trim() !== "Exam 7 · Question bank") errs.push("QUESTION BANK MOCK title is missing");
   if (await page.locator('#pmain .qmap button').count() !== 80) errs.push("EXAM 7 does not contain 80 questions");
+  if (await page.locator("#pmain .exam-untimed").count() !== 1) errs.push("QUESTION BANK MOCK is not untimed");
   await page.click('#pmain [data-pact="submit"]'); await page.click('#pmain [data-pact="submityes"]'); await page.waitForTimeout(200);
   // game + watch
   await page.click('.nav a[data-nav="game"]'); await page.waitForTimeout(800);

@@ -1,6 +1,6 @@
 """Build the app: one self-contained HTML page.
 Outputs go to ../dist/: scrum-master-on-duty.html (artifact page, no doctype) and index.html (standalone file / GitHub Pages).
-The practice bank, six fixed exams, and both Scrum Guide texts are embedded at build time."""
+The practice bank, all course exams, and both Scrum Guide texts are embedded at build time."""
 import json, re, sys, pathlib, subprocess, html as H
 d = pathlib.Path(__file__).parent
 G = d / "guide"
@@ -108,6 +108,7 @@ for path, topic, topic_name, source_label in IMPORTED_BANKS:
             "sourceLabel": source_label,
             "sourceTest": source.get("test"),
             "sourceNr": source.get("nr"),
+            "tf": True,
         })
 data = {"questions": q["questions"] + imported_questions, "topics": topics}
 exam_data = json.loads(EXAM_BANK.read_text(encoding="utf-8"))

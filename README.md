@@ -4,7 +4,7 @@ A free PSM I study kit that runs in any browser, with no sign-up:
 
 - **Scrum Guide 2020**: the full text in English and in the official German translation, searchable, with explained terms.
 - **Practice**: smart rounds, rounds by topic, mistakes review, plus separate Product Owner and Scrum Master question banks.
-- **Exams**: six fixed 80-question exams and a random 80-question mock from the practice bank.
+- **Exams**: 18 untimed exams in three course groups—Scrum Course 1, Scrum Course 2, and Product Owner Course—plus a random 80-question mock from the question bank.
 - **Game**: three Sprints as the Scrum Master of a small web team, with an animated office and a "Watch a Sprint" mode.
 
 Open it: https://trais92.github.io/scrum-study/
@@ -31,7 +31,7 @@ npm ci
 npx playwright install chromium
 ```
 
-Run `npm test` to validate all question banks and six exam sets, rebuild `dist/`, check the Guide quotes, simulate a game, and run browser smoke checks on desktop and phone-sized viewports.
+Run `npm test` to validate all question banks and course exam groupings, rebuild `dist/`, check the Guide quotes, simulate a game, and run browser smoke checks on desktop and phone-sized viewports.
 
 CI reports two separate checks:
 
@@ -48,8 +48,8 @@ CI reports two separate checks:
 | `src/engine.js`, `src/story.js`, `src/office.js` | The game: rules, story and animated office |
 | `src/guide/` | Scrum Guide 2020: English, official German (from the PDF) and term explanations |
 | `data/questions.json` | The practice question bank, each answer with its Scrum Guide quote |
-| `data/exams.json` | Six fixed, 80-question exam sets |
-| `data/imported/` | Separate Product Owner (1,000) and Scrum Master (1,002) question banks |
+| `data/exams.json` | Six fixed, 80-question Scrum Course 1 exam sets |
+| `data/imported/` | Product Owner (1,000) and Scrum Master (1,002) questions, each organized into six course exams |
 | `src/tests/` | Quote, game simulation, and Playwright checks |
 | `docs/` | Backlog and notes for working with agents in Delta |
 

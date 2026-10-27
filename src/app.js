@@ -28,7 +28,50 @@ const EXAM_SETS = Array.from({ length: 6 }, (_, index) => {
   const test = index + 1;
   return { id: "exam-" + test, label: "Exam " + test, questions: EXAM_QUESTIONS.filter(q => q.examTest === test).sort((a, b) => a.examNr - b.examNr) };
 });
-const ALL_EXAM_QUESTIONS = EXAM_SETS.flatMap(set => set.questions);
+const importedExamGroup = (topic, course, prefix) => ({
+  id: prefix,
+  label: course,
+  exams: Array.from({ length: 6 }, (_, index) => {
+    const test = index + 1;
+    return {
+      id: `exam-${prefix}-${test}`,
+      label: `${course} · Exam ${test}`,
+      shortLabel: `Exam ${test}`,
+      questions: QS.filter(q => q.t === topic && q.sourceTest === test).sort((a, b) => a.sourceNr - b.sourceNr)
+    };
+  })
+});
+const EXAM_GROUPS = [
+  {
+    id: "scrum-course-1",
+    label: "Scrum Course 1",
+    exams: EXAM_SETS.map(set => ({ ...set, shortLabel: set.label, label: `Scrum Course 1 · ${set.label}` }))
+  },
+  importedExamGroup("psm", "Scrum Course 2", "psm"),
+  importedExamGroup("po", "Product Owner Course", "po")
+];
+const COURSE_EXAMS = EXAM_GROUPS.flatMap(group => group.exams);
+const EXAM_BY_ID = Object.fromEntries(COURSE_EXAMS.map(exam => [exam.id, exam]));
+const ALL_EXAM_QUESTIONS = COURSE_EXAMS.flatMap(set => set.questions);
+function examTileHtml(exam, attr, index) {
+  return `<button class="exam-tile" type="button" ${attr}="${exam.id}">
+    <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(exam.shortLabel)}</b><small>${exam.questions.length} questions · Untimed</small></span><span class="exam-arrow" aria-hidden="true">→</span>
+  </button>`;
+}
+function examGroupsHtml(attr) {
+  return EXAM_GROUPS.map((group, index) => {
+    const questionCount = group.exams.reduce((sum, exam) => sum + exam.questions.length, 0);
+    return `<details class="exam-group" ${index === 0 ? "open" : ""}>
+      <summary><span>${esc(group.label)}</span><small>${group.exams.length} exams · ${questionCount} questions</small></summary>
+      <div class="exam-grid">${group.exams.map((exam, examIndex) => examTileHtml(exam, attr, examIndex)).join("")}</div>
+    </details>`;
+  }).join("");
+}
+function examBankTileHtml(attr) {
+  return `<button class="exam-tile exam-bank" type="button" ${attr}="exam-bank">
+    <span class="exam-number">↻</span><span class="exam-copy"><b>Question bank mock</b><small>Random 80 questions · Untimed</small></span><span class="exam-arrow" aria-hidden="true">→</span>
+  </button>`;
+}
 const ICON = {
   book: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 3h4.5a2 2 0 0 1 2 2v8.5a1.5 1.5 0 0 0-1.5-1.5H2zM14 3H9.5a2 2 0 0 0-1 .3"/><path d="M14 3v9H9a1.5 1.5 0 0 0-1.5 1.5"/></svg>',
   search: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>',
@@ -117,16 +160,10 @@ function renderHome() {
       </section>
       </div>
       <section class="entry exam-entry" aria-labelledby="h-prac">
-        <div class="exam-heading"><div><span class="exam-kicker">Timed practice</span><h2 id="h-prac">Choose an exam</h2></div><span class="exam-count">7 exams</span></div>
-        <p>Take one of the six fixed exams or try a randomized set from the question bank.</p>
-        <div class="exam-grid">
-          ${EXAM_SETS.map((set, index) => `<button class="exam-tile" type="button" data-home="${set.id}">
-            <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(set.label)}</b><small>80 questions · 60 min</small></span><span class="exam-arrow" aria-hidden="true">→</span>
-          </button>`).join("")}
-          <button class="exam-tile exam-bank" type="button" data-home="exam-bank">
-            <span class="exam-number">07</span><span class="exam-copy"><b>Exam 7 · Question bank</b><small>Random 80 questions · 60 min</small></span><span class="exam-arrow" aria-hidden="true">→</span>
-          </button>
-        </div>
+        <div class="exam-heading"><div><span class="exam-kicker">Untimed practice</span><h2 id="h-prac">Choose an exam</h2></div><span class="exam-count">18 exams</span></div>
+        <p>Choose a course, then open any exam when you’re ready. No timer—take your time.</p>
+        <div class="exam-groups">${examGroupsHtml("data-home")}</div>
+        <div class="exam-random"><span class="exam-kicker">Mix it up</span>${examBankTileHtml("data-home")}</div>
       </section>
     </div>
     <section class="entry game-entry" aria-labelledby="h-game">
@@ -149,7 +186,7 @@ document.addEventListener("click", e => {
   if (k === "smart") go("practice", () => guardExam(() => startPractice({})));
   if (k === "exam") go("practice");
   if (k === "exam-bank") go("practice", () => guardExam(() => startExam()));
-  if (/^exam-[1-6]$/.test(k)) go("practice", () => guardExam(() => startExam(EXAM_SETS.find(set => set.id === k))));
+  if (EXAM_BY_ID[k]) go("practice", () => guardExam(() => startExam(EXAM_BY_ID[k])));
   if (k === "mistakes") go("practice", () => guardExam(() => startPractice({ ids: mistakes().map(q => q.id), label: "My mistakes" })));
   if (k === "blitz") go("game", () => { if (watch.on) watchStop(); startBlitz("title"); });
   if (k === "watch") go("game", watchStart);
@@ -305,7 +342,7 @@ $("sgBody").addEventListener("focusin", e => { const t = e.target.closest(".term
 $("sgBody").addEventListener("focusout", hideTip);
 
 // ---------- Exam practice ----------
-let P = null; // { mode, label, items:[{q, order, picked, checked}], i, end, timer, flags:Set, done }
+let P = null; // { mode, label, items:[{q, order, picked, checked}], i, flags:Set, done }
 function topicScore(t) {
   let tot = 0, ok = 0, seen = 0; const qs = QS.filter(q => q.t === t);
   qs.forEach(q => { const s = pstore.stats[q.id]; if (s && s.h && s.h.length) { seen++; tot += s.h.length; ok += s.h.reduce((a, b) => a + b, 0); } });
@@ -326,10 +363,12 @@ function renderPractice() {
       <button class="ptile" type="button" data-p="mistakes" ${mk ? "" : "disabled"}><b>${ICON.redo}My mistakes</b><span>${mk ? `${mk} to redo` : "None yet"}</span></button>
       <button class="ptile" type="button" data-p="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round</span></button>
     </div>
-    <section class="pcard"><h2>Mock exams</h2><div class="practice-row">
-      ${EXAM_SETS.map(set => `<button class="ptile" type="button" data-p="${set.id}"><b>${ICON.clock}${esc(set.label)}</b><span>80 questions · 60 min</span></button>`).join("")}
-      <button class="ptile" type="button" data-p="exam-bank"><b>${ICON.clock}Exam 7 · Question bank</b><span>Random 80 questions · 60 min</span></button>
-    </div></section>
+    <section class="pcard exam-entry" aria-labelledby="examPracticeHeading">
+      <div class="exam-heading"><div><span class="exam-kicker">Untimed practice</span><h2 id="examPracticeHeading">Course exams</h2></div><span class="exam-count">18 exams</span></div>
+      <p>Pick an exam from one of your three course collections. Your answers are saved as you go.</p>
+      <div class="exam-groups">${examGroupsHtml("data-p")}</div>
+      <div class="exam-random"><span class="exam-kicker">Mix it up</span>${examBankTileHtml("data-p")}</div>
+    </section>
     <section class="pcard"><h2>By topic</h2><div class="ptopics">${Object.entries(QB.topics).map(([k, name]) => {
       const s = topicScore(k); const pt = s.pct === null ? "not started" : s.pct + "%";
       return `<div class="ptopic"><div><div class="nm">${esc(name)}</div><div class="sb">${s.seen}/${s.total} seen</div></div><div class="meterbar" role="img" aria-label="${pt}"><i style="width:${s.pct || 0}%"></i></div><div class="row" style="flex-wrap:nowrap"><span class="pct">${pt}</span><button class="pbtn" type="button" data-topic="${k}">Practise</button></div></div>`;
@@ -345,9 +384,9 @@ document.addEventListener("click", e => {
   const k = b.dataset.p || b.dataset.pact;
   if (k === "smart") guardExam(() => startPractice({}));
   if (k === "exam-bank") guardExam(() => startExam());
-  if (/^exam-[1-6]$/.test(k)) guardExam(() => startExam(EXAM_SETS.find(set => set.id === k)));
+  if (EXAM_BY_ID[k]) guardExam(() => startExam(EXAM_BY_ID[k]));
   if (k === "mistakes") guardExam(() => startPractice({ ids: mistakes().map(q => q.id), label: "My mistakes" }));
-  if (k === "leaveyes") { const f = P.pending; clearInterval(P.timer); P = null; saveExam(); f(); return; }
+  if (k === "leaveyes") { const f = P.pending; P = null; saveExam(); f(); return; }
   if (k === "blitz") go("game", () => { if (watch.on) watchStop(); startBlitz("title"); });
   if (k === "askreset") $("presetRow").innerHTML = `<div class="confirm"><span>Clear all practice answers and mock exam results in this browser?</span><div class="row"><button class="pbtn" type="button" data-p="reset">Yes, reset</button><button class="pbtn" type="button" data-p="noreset">Cancel</button></div></div>`;
   if (k === "reset") { pstore = { stats: {}, exams: [] }; psave(); renderPractice(); }
@@ -358,7 +397,7 @@ document.addEventListener("click", e => {
   if (k === "quit") { P.confirm = "quit"; renderPQ(); }
   if (k === "submit") { P.confirm = "submit"; renderPQ(); }
   if (k === "cancel") { P.confirm = null; P.pending = null; renderPQ(); }
-  if (k === "quityes") { clearInterval(P.timer); P = null; saveExam(); renderPractice(); window.scrollTo({ top: 0 }); }
+  if (k === "quityes") { P = null; saveExam(); renderPractice(); window.scrollTo({ top: 0 }); }
   if (k === "submityes") finishExam();
   if (k === "home") { P = null; renderPractice(); window.scrollTo({ top: 0 }); }
   if (k === "again") startPractice(P.again);
@@ -371,15 +410,15 @@ function guardExam(f) {
   f();
 }
 function saveExam() {
-  pstore.exam = P && P.mode === "exam" && !P.done ? { ids: P.items.map(it => it.q.id), order: P.items.map(it => it.order), picked: P.items.map(it => it.picked), flags: [...P.flags], end: P.end, i: P.i, label: P.label, examId: P.examId } : null;
+  pstore.exam = P && P.mode === "exam" && !P.done ? { ids: P.items.map(it => it.q.id), order: P.items.map(it => it.order), picked: P.items.map(it => it.picked), flags: [...P.flags], i: P.i, label: P.label, examId: P.examId } : null;
   psave();
 }
 function restoreExam() {
   const e = pstore.exam; if (!e || !e.ids) return;
   const items = e.ids.map((id, k) => QBYID[id] && { q: QBYID[id], order: e.order[k], picked: e.picked[k] || [], checked: false });
   if (items.some(x => !x)) { pstore.exam = null; psave(); return; }
-  P = { mode: "exam", label: e.label || "Exam 7 · Question bank", examId: e.examId || "exam-bank", items, i: e.i || 0, flags: new Set(e.flags || []), end: e.end };
-  P.timer = setInterval(pTick, 1000);
+  const examId = e.examId || "exam-bank";
+  P = { mode: "exam", label: EXAM_BY_ID[examId]?.label || e.label || "Question bank mock", examId, items, i: e.i || 0, flags: new Set(e.flags || []) };
 }
 function pickWeighted(pool, n) {
   const w = q => { const s = pstore.stats[q.id]; if (!s) return 3; const last = s.h[s.h.length - 1]; return last === 0 ? 5 : 1 + (s.h.length < 2 ? 1 : 0); };
@@ -397,23 +436,13 @@ function startPractice(opt) {
   else if (opt.topics) { pool = QS.filter(q => opt.topics.includes(q.t)); label = opt.topics.map(t => QB.topics[t]).join(" + "); }
   else { pool = QS; label = "Smart round"; }
   const items = (opt.ids ? shuffle(pool).slice(0, 12) : pickWeighted(pool, 10)).map(makeItem);
-  if (P && P.timer) clearInterval(P.timer);
   P = { mode: "practice", label, items, i: 0, again: opt, flags: new Set() };
   renderPQ(); window.scrollTo({ top: 0 });
 }
 function startExam(examSet) {
-  if (P && P.timer) clearInterval(P.timer);
   const questions = examSet ? examSet.questions : shuffle(QS).slice(0, 80);
-  P = { mode: "exam", label: examSet ? examSet.label : "Exam 7 · Question bank", examId: examSet ? examSet.id : "exam-bank", items: questions.map(makeItem), i: 0, flags: new Set(), end: Date.now() + 60 * 60 * 1000 };
-  P.timer = setInterval(pTick, 1000);
+  P = { mode: "exam", label: examSet ? examSet.label : "Exam 7 · Question bank", examId: examSet ? examSet.id : "exam-bank", items: questions.map(makeItem), i: 0, flags: new Set() };
   saveExam(); renderPQ(); window.scrollTo({ top: 0 });
-}
-function pTick() {
-  if (!P || P.mode !== "exam" || P.done) return;
-  const left = Math.max(0, P.end - Date.now());
-  const el = document.getElementById("qtimer");
-  if (el) { el.textContent = `${String(Math.floor(left / 60000)).padStart(2, "0")}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")}`; el.classList.toggle("low", left < 5 * 60000); }
-  if (left <= 0) finishExam();
 }
 function chatHtml(s) {
   return `<div class="qchat"><span class="lbl">Team chat</span>${linesHtml(s.filter(l => LOOK[l[0]]), false)}</div>`;
@@ -428,7 +457,7 @@ function renderPQ() {
   const it = P.items[P.i], q = it.q, ex = P.mode === "exam", multi = q.a.length > 1;
   const answered = P.items.filter(x => x.picked.length === x.q.a.length).length;
   let h = `<div class="pcard">
-    <div class="qhead"><span class="mode">${ex ? esc(P.label) : "Practice · " + esc(P.label)}</span><span class="hint">Question ${P.i + 1} of ${P.items.length}</span><span class="sp"></span>${ex ? `<span class="qtimer" id="qtimer" aria-live="off">60:00</span>` : ""}<button class="pbtn" type="button" data-pact="quit">Quit</button></div>
+    <div class="qhead"><span class="mode">${ex ? esc(P.label) : "Practice · " + esc(P.label)}</span><span class="hint">Question ${P.i + 1} of ${P.items.length}</span><span class="sp"></span>${ex ? `<span class="exam-untimed">Untimed</span>` : ""}<button class="pbtn" type="button" data-pact="quit">Quit</button></div>
     <div class="qbar"><i style="width:${(ex ? answered : P.i + (it.checked ? 1 : 0)) / P.items.length * 100}%"></i></div>
     <div class="qmeta"><span>${esc(QB.topics[q.t])}</span>${multi ? `<span class="choose">Choose ${q.a.length}</span>` : ""}</div>
     ${q.s ? chatHtml(q.s) : ""}
@@ -451,7 +480,6 @@ function renderPQ() {
   if (ex) h += `<div><span class="hint">${answered} of ${P.items.length} answered · ${P.flags.size} flagged</span><div class="qmap" style="margin-top:6px">${P.items.map((x, i) => `<button type="button" class="${[x.picked.length === x.q.a.length ? "done" : "", P.flags.has(i) ? "flag" : "", i === P.i ? "cur" : ""].join(" ")}" data-go="${i}" aria-label="Question ${i + 1}">${i + 1}</button>`).join("")}</div></div>`;
   h += `</div>`;
   $("pmain").innerHTML = h;
-  pTick();
 }
 function pPick(oi) {
   const it = P.items[P.i], q = it.q;
@@ -472,12 +500,10 @@ function pAct() {
 function finishPractice() { showPResults(false); }
 function finishExam() {
   if (!P || P.done) return;
-  clearInterval(P.timer);
   P.items.forEach(it => { if (it.picked.length) record(it.q.id, sameSet(it.picked, it.q.a)); });
   const ok = P.items.filter(it => sameSet(it.picked, it.q.a)).length;
   const d = new Date(); pstore.exams.push({ date: d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }), score: Math.round(ok / P.items.length * 100), label: P.label });
   P.done = true; saveExam();
-  P.used = Math.round((60 * 60 * 1000 - Math.max(0, P.end - Date.now())) / 60000);
   showPResults(true);
 }
 function showPResults(exam) {
@@ -486,7 +512,7 @@ function showPResults(exam) {
   const by = {}; P.items.forEach(it => { const t = it.q.t; by[t] = by[t] || [0, 0]; by[t][1]++; if (sameSet(it.picked, it.q.a)) by[t][0]++; });
   const wrong = P.items.filter(it => !sameSet(it.picked, it.q.a)); P.wrongIds = wrong.map(it => it.q.id);
   $("pmain").innerHTML = `<div class="pcard">
-    <span class="hint" style="text-transform:uppercase;letter-spacing:.1em;font-weight:700">${exam ? `${esc(P.label)} result · ${P.used} min used` : "Practice result · " + esc(P.label)}</span>
+    <span class="hint" style="text-transform:uppercase;letter-spacing:.1em;font-weight:700">${exam ? `${esc(P.label)} · exam result` : "Practice result · " + esc(P.label)}</span>
     <div class="row" style="gap:18px"><span class="bigpct">${pct}%</span><span class="pverdict ${pass ? "pass" : "fail"}">${exam ? (pass ? "Pass" : "Below pass mark") : (pass ? "Exam level" : "Keep practising")}</span></div>
     <span>${ok} of ${n} correct · PSM I pass mark is 85%</span>
     <div class="ptopics">${Object.entries(by).map(([t, [a, m]]) => { const p = Math.round(a / m * 100); return `<div class="ptopic"><div><div class="nm">${esc(QB.topics[t])}</div><div class="sb">${a} of ${m} correct</div></div><div class="meterbar"><i style="width:${p}%"></i></div><span class="pct">${p}%</span></div>`; }).join("")}</div>
