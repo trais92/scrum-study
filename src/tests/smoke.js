@@ -19,6 +19,12 @@ const OUT = shotsDir + "/app-";
   await page.goto(appUrl);
   await page.waitForTimeout(1500);
   await page.screenshot({ path: OUT + tag + "-home.png", fullPage: true }); await ov("home");
+  if (await page.locator('#v-home [data-home^="exam-"]').count() !== 7) errs.push("HOME EXAM HIGHLIGHT does not show all seven exams");
+  await page.click('#v-home [data-home="exam-1"]'); await page.waitForTimeout(300);
+  if ((await page.locator("#pmain .qhead .mode").textContent()).trim() !== "Exam 1") errs.push("HOME EXAM 1 did not start");
+  if (await page.locator("#pmain .qmap button").count() !== 80) errs.push("HOME EXAM 1 does not contain 80 questions");
+  await page.click('#pmain [data-pact="quit"]'); await page.click('#pmain [data-pact="quityes"]'); await page.waitForTimeout(200);
+  await page.click(".brand"); await page.waitForTimeout(300);
   // guide search
   await page.fill("#hq", "Definition of Done"); await page.press("#hq", "Enter");
   await page.waitForTimeout(600);

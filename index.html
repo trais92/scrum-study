@@ -392,13 +392,37 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .welcome h1 { font-family: var(--f-display); font-weight: 900; font-size: clamp(38px, 5.6vw, 64px); line-height: .9; margin: 0; text-transform: uppercase; letter-spacing: .01em; }
 .welcome h1 span { color: var(--accent); }
 .welcome p { margin: 0; font-size: 16px; color: var(--muted); max-width: 640px; }
-.entries { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; }
+.home-main { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: 16px; align-items: start; }
+.home-left { display: grid; gap: 14px; min-width: 0; }
 .entry { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 20px; display: grid; gap: 14px; align-content: start; overflow: hidden; }
 .entry h2 { margin: 0; font-family: var(--f-display); font-weight: 900; font-size: 30px; line-height: 1; text-transform: uppercase; letter-spacing: .02em; display: flex; align-items: center; gap: 10px; }
 .entry h2 svg { width: 26px; height: 26px; color: var(--accent); }
 .entry p { margin: 0; }
 .entry .sub { color: var(--muted); font-size: 14px; }
 .entry.guide-entry { background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 8%, var(--panel)) 0%, var(--panel) 62%); }
+.home-quick { display: grid; gap: 8px; padding: 0 2px; }
+.quick-label, .exam-kicker, .game-kicker { color: var(--accent-ink); font: 800 11px var(--f-mono); letter-spacing: .09em; text-transform: uppercase; }
+.quick-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.quick-chip { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.quick-chip:hover:not(:disabled) { border-color: var(--accent); }
+.quick-chip:disabled { opacity: .55; cursor: not-allowed; }
+.quick-chip svg { width: 16px; height: 16px; color: var(--accent-ink); flex: none; }
+.exam-entry { background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 13%, var(--panel)) 0%, var(--panel) 72%); border-color: color-mix(in srgb, var(--accent) 32%, var(--line)); }
+.exam-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.exam-heading > div { display: grid; gap: 6px; }
+.exam-count { flex: none; padding: 6px 10px; border-radius: 99px; background: var(--ink); color: var(--panel); font: 700 12px var(--f-mono); white-space: nowrap; }
+.exam-entry > p { margin-top: -4px; color: var(--muted); font-size: 14px; }
+.exam-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.exam-tile { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-width: 0; padding: 9px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); text-align: left; font: inherit; cursor: pointer; transition: border-color .15s, transform .15s, box-shadow .15s; }
+.exam-tile:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow); }
+.exam-number { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; background: var(--accent-soft); color: var(--accent-ink); font: 800 12px var(--f-mono); }
+.exam-copy { display: grid; gap: 3px; min-width: 0; }
+.exam-copy b { font-size: 13px; line-height: 1.2; }
+.exam-copy small { color: var(--muted); font-size: 11px; line-height: 1.25; }
+.exam-arrow { color: var(--accent-ink); font-size: 18px; line-height: 1; }
+.exam-bank { border-color: var(--ink); background: var(--ink); color: var(--panel); }
+.exam-bank .exam-number { background: var(--accent); }
+.exam-bank .exam-copy small { color: inherit; opacity: .74; }
 .bigsearch { display: flex; align-items: center; gap: 8px; border: 2px solid var(--ink); border-radius: 12px; background: var(--panel); padding: 4px 4px 4px 12px; }
 .bigsearch:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 .bigsearch svg { width: 20px; height: 20px; flex: none; color: var(--muted); }
@@ -409,6 +433,10 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .chip:hover { border-color: var(--accent); }
 .chip.lang-de::before { content: "DE · "; font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
 .gamepreview { border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--o-wall); }
+.game-entry { grid-template-columns: minmax(220px, .75fr) minmax(0, 1.25fr); align-items: center; gap: 24px; }
+.game-copy { display: grid; gap: 12px; align-content: center; }
+.game-copy h2 { margin: 0; }
+.game-copy p { max-width: 420px; color: var(--muted); line-height: 1.5; }
 
 .practice-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .ptile { text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 14px 12px; display: grid; gap: 6px; align-content: start; cursor: pointer; color: var(--ink); font: inherit; transition: border-color .15s, transform .15s; }
@@ -638,7 +666,8 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 @media (max-width: 960px) {
   :root { --toph: 54px; }
   .brand small { display: none; }
-  .entries { grid-template-columns: minmax(0, 1fr); }
+  .home-main { grid-template-columns: minmax(0, 1fr); }
+  .game-entry { grid-template-columns: minmax(220px, .75fr) minmax(0, 1.25fr); }
   .practice-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   main.game { grid-template-columns: minmax(0, 1fr); padding-block: 12px calc(84px + env(safe-area-inset-bottom, 0px)); }
   .leftcol { position: static; max-height: none; }
@@ -665,8 +694,11 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
   .bigsearch .primary span { display: none; }
   .entry { padding: 16px; }
   .entry h2 { font-size: 26px; }
+  .game-entry { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .exam-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .qtext { font-size: 18px; }
 }
+@media (max-width: 380px) { .exam-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 380px) { .nav a span { display: none; } .nav a { padding: 8px 12px; } }
 .watchbar { position: sticky; top: 0; z-index: 4; }
 .scene.watching .scene-body button { pointer-events: none; }
@@ -3046,26 +3078,43 @@ function renderHome() {
   const rd = readiness(), mk = mistakes().length;
   const saved = loadGame(); const canResume = saved && !saved.done && (saved.pos > 0 || saved.sp > 0);
   $("v-home").innerHTML = `<div class="wrap home">
-    <div class="entries">
+    <div class="home-main">
+      <div class="home-left">
       <section class="entry guide-entry" aria-labelledby="h-guide">
         <h2 id="h-guide">${ICON.book}Scrum Guide 2020</h2>
         <form class="bigsearch" id="homeSearch" role="search">${ICON.search}<input id="hq" type="search" placeholder="Search the Scrum Guide" aria-label="Search the Scrum Guide" autocomplete="off"><button class="primary" type="submit"><span>Search</span>${ICON.search.replace('aria-hidden="true"', 'aria-hidden="true" style="width:16px;height:16px"')}</button></form>
         <div class="row"><a class="primary" href="#guide" data-lang-go="en">Read in English</a><a class="primary alt" href="#guide" data-lang-go="de" lang="de">Auf Deutsch lesen</a></div>
       </section>
-      <section class="entry" aria-labelledby="h-game">
-        <h2 id="h-game">${ICON.play.replace('fill="currentColor"', 'fill="var(--accent)"')}The game</h2>
-        <div class="gamepreview" id="gpreview">${officePreviewHtml()}</div>
-        <div class="row"><a class="primary" href="#game">${canResume ? `Continue Sprint ${saved.sp + 1}` : "Play"}</a><button class="primary alt" type="button" data-home="watch">${ICON.eye}Watch a Sprint</button></div>
+      <section class="home-quick" aria-label="More practice options">
+        <span class="quick-label">More practice</span>
+        <div class="quick-actions">
+          <button class="quick-chip" type="button" data-home="smart">${ICON.bolt}<span>Smart round</span></button>
+          <button class="quick-chip" type="button" data-home="mistakes" ${mk ? "" : "disabled"}>${ICON.redo}<span>My mistakes${mk ? ` · ${mk}` : ""}</span></button>
+          <button class="quick-chip" type="button" data-home="blitz">${ICON.who}<span>Who decides?</span></button>
+        </div>
+      </section>
+      </div>
+      <section class="entry exam-entry" aria-labelledby="h-prac">
+        <div class="exam-heading"><div><span class="exam-kicker">Timed practice</span><h2 id="h-prac">Choose an exam</h2></div><span class="exam-count">7 exams</span></div>
+        <p>Take one of the six fixed exams or try a randomized set from the question bank.</p>
+        <div class="exam-grid">
+          ${EXAM_SETS.map((set, index) => `<button class="exam-tile" type="button" data-home="${set.id}">
+            <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(set.label)}</b><small>80 questions · 60 min</small></span><span class="exam-arrow" aria-hidden="true">→</span>
+          </button>`).join("")}
+          <button class="exam-tile exam-bank" type="button" data-home="exam-bank">
+            <span class="exam-number">07</span><span class="exam-copy"><b>Exam 7 · Question bank</b><small>Random 80 questions · 60 min</small></span><span class="exam-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
       </section>
     </div>
-    <section aria-labelledby="h-prac" style="display:grid;gap:12px">
-      <div class="sechead"><h2 id="h-prac">Exam practice</h2><span class="hint">${QS.length} questions · ${rd.seen} seen${rd.pct !== null ? ` · ${rd.pct}% right lately` : ""}</span></div>
-      <div class="practice-row">
-        <button class="ptile" type="button" data-home="smart"><b>${ICON.bolt}Smart round</b><span>10 questions</span></button>
-        <button class="ptile" type="button" data-home="exam"><b>${ICON.clock}Choose a mock exam</b><span>Six fixed exams plus the question-bank mock</span></button>
-        <button class="ptile" type="button" data-home="mistakes" ${mk ? "" : "disabled"}><b>${ICON.redo}My mistakes</b><span>${mk ? `${mk} to redo` : "None yet"}</span></button>
-        <button class="ptile" type="button" data-home="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round</span></button>
+    <section class="entry game-entry" aria-labelledby="h-game">
+      <div class="game-copy">
+        <span class="game-kicker">Three-sprint simulation</span>
+        <h2 id="h-game">${ICON.play.replace('fill="currentColor"', 'fill="var(--accent)"')}The game</h2>
+        <p>Step into the Scrum Master role, guide a team through three Sprints, and see the impact of your decisions.</p>
+        <div class="row"><a class="primary" href="#game">${canResume ? `Continue Sprint ${saved.sp + 1}` : "Play"}</a><button class="primary alt" type="button" data-home="watch">${ICON.eye}Watch a Sprint</button></div>
       </div>
+      <div class="gamepreview" id="gpreview">${officePreviewHtml()}</div>
     </section>
     <footer class="foot"><span>Scrum Guide 2020 © Ken Schwaber &amp; Jeff Sutherland, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>, from <a href="https://scrumguides.org" target="_blank" rel="noopener">scrumguides.org</a>. German: GermanScrumTranslators. Questions are study material, not official Scrum.org questions.</span></footer>
   </div>`;
@@ -3077,6 +3126,8 @@ document.addEventListener("click", e => {
   const k = h.dataset.home;
   if (k === "smart") go("practice", () => guardExam(() => startPractice({})));
   if (k === "exam") go("practice");
+  if (k === "exam-bank") go("practice", () => guardExam(() => startExam()));
+  if (/^exam-[1-6]$/.test(k)) go("practice", () => guardExam(() => startExam(EXAM_SETS.find(set => set.id === k))));
   if (k === "mistakes") go("practice", () => guardExam(() => startPractice({ ids: mistakes().map(q => q.id), label: "My mistakes" })));
   if (k === "blitz") go("game", () => { if (watch.on) watchStop(); startBlitz("title"); });
   if (k === "watch") go("game", watchStart);

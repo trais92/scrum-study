@@ -100,26 +100,43 @@ function renderHome() {
   const rd = readiness(), mk = mistakes().length;
   const saved = loadGame(); const canResume = saved && !saved.done && (saved.pos > 0 || saved.sp > 0);
   $("v-home").innerHTML = `<div class="wrap home">
-    <div class="entries">
+    <div class="home-main">
+      <div class="home-left">
       <section class="entry guide-entry" aria-labelledby="h-guide">
         <h2 id="h-guide">${ICON.book}Scrum Guide 2020</h2>
         <form class="bigsearch" id="homeSearch" role="search">${ICON.search}<input id="hq" type="search" placeholder="Search the Scrum Guide" aria-label="Search the Scrum Guide" autocomplete="off"><button class="primary" type="submit"><span>Search</span>${ICON.search.replace('aria-hidden="true"', 'aria-hidden="true" style="width:16px;height:16px"')}</button></form>
         <div class="row"><a class="primary" href="#guide" data-lang-go="en">Read in English</a><a class="primary alt" href="#guide" data-lang-go="de" lang="de">Auf Deutsch lesen</a></div>
       </section>
-      <section class="entry" aria-labelledby="h-game">
-        <h2 id="h-game">${ICON.play.replace('fill="currentColor"', 'fill="var(--accent)"')}The game</h2>
-        <div class="gamepreview" id="gpreview">${officePreviewHtml()}</div>
-        <div class="row"><a class="primary" href="#game">${canResume ? `Continue Sprint ${saved.sp + 1}` : "Play"}</a><button class="primary alt" type="button" data-home="watch">${ICON.eye}Watch a Sprint</button></div>
+      <section class="home-quick" aria-label="More practice options">
+        <span class="quick-label">More practice</span>
+        <div class="quick-actions">
+          <button class="quick-chip" type="button" data-home="smart">${ICON.bolt}<span>Smart round</span></button>
+          <button class="quick-chip" type="button" data-home="mistakes" ${mk ? "" : "disabled"}>${ICON.redo}<span>My mistakes${mk ? ` · ${mk}` : ""}</span></button>
+          <button class="quick-chip" type="button" data-home="blitz">${ICON.who}<span>Who decides?</span></button>
+        </div>
+      </section>
+      </div>
+      <section class="entry exam-entry" aria-labelledby="h-prac">
+        <div class="exam-heading"><div><span class="exam-kicker">Timed practice</span><h2 id="h-prac">Choose an exam</h2></div><span class="exam-count">7 exams</span></div>
+        <p>Take one of the six fixed exams or try a randomized set from the question bank.</p>
+        <div class="exam-grid">
+          ${EXAM_SETS.map((set, index) => `<button class="exam-tile" type="button" data-home="${set.id}">
+            <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(set.label)}</b><small>80 questions · 60 min</small></span><span class="exam-arrow" aria-hidden="true">→</span>
+          </button>`).join("")}
+          <button class="exam-tile exam-bank" type="button" data-home="exam-bank">
+            <span class="exam-number">07</span><span class="exam-copy"><b>Exam 7 · Question bank</b><small>Random 80 questions · 60 min</small></span><span class="exam-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
       </section>
     </div>
-    <section aria-labelledby="h-prac" style="display:grid;gap:12px">
-      <div class="sechead"><h2 id="h-prac">Exam practice</h2><span class="hint">${QS.length} questions · ${rd.seen} seen${rd.pct !== null ? ` · ${rd.pct}% right lately` : ""}</span></div>
-      <div class="practice-row">
-        <button class="ptile" type="button" data-home="smart"><b>${ICON.bolt}Smart round</b><span>10 questions</span></button>
-        <button class="ptile" type="button" data-home="exam"><b>${ICON.clock}Choose a mock exam</b><span>Six fixed exams plus the question-bank mock</span></button>
-        <button class="ptile" type="button" data-home="mistakes" ${mk ? "" : "disabled"}><b>${ICON.redo}My mistakes</b><span>${mk ? `${mk} to redo` : "None yet"}</span></button>
-        <button class="ptile" type="button" data-home="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round</span></button>
+    <section class="entry game-entry" aria-labelledby="h-game">
+      <div class="game-copy">
+        <span class="game-kicker">Three-sprint simulation</span>
+        <h2 id="h-game">${ICON.play.replace('fill="currentColor"', 'fill="var(--accent)"')}The game</h2>
+        <p>Step into the Scrum Master role, guide a team through three Sprints, and see the impact of your decisions.</p>
+        <div class="row"><a class="primary" href="#game">${canResume ? `Continue Sprint ${saved.sp + 1}` : "Play"}</a><button class="primary alt" type="button" data-home="watch">${ICON.eye}Watch a Sprint</button></div>
       </div>
+      <div class="gamepreview" id="gpreview">${officePreviewHtml()}</div>
     </section>
     <footer class="foot"><span>Scrum Guide 2020 © Ken Schwaber &amp; Jeff Sutherland, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>, from <a href="https://scrumguides.org" target="_blank" rel="noopener">scrumguides.org</a>. German: GermanScrumTranslators. Questions are study material, not official Scrum.org questions.</span></footer>
   </div>`;
@@ -131,6 +148,8 @@ document.addEventListener("click", e => {
   const k = h.dataset.home;
   if (k === "smart") go("practice", () => guardExam(() => startPractice({})));
   if (k === "exam") go("practice");
+  if (k === "exam-bank") go("practice", () => guardExam(() => startExam()));
+  if (/^exam-[1-6]$/.test(k)) go("practice", () => guardExam(() => startExam(EXAM_SETS.find(set => set.id === k))));
   if (k === "mistakes") go("practice", () => guardExam(() => startPractice({ ids: mistakes().map(q => q.id), label: "My mistakes" })));
   if (k === "blitz") go("game", () => { if (watch.on) watchStop(); startBlitz("title"); });
   if (k === "watch") go("game", watchStart);
