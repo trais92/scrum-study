@@ -3,6 +3,7 @@ const TOPIC_SUB = { theory: "Empiricism, pillars, values", team: "Accountabiliti
 const PPKEY = "smod-practice-v1", GKEY = "smod-guide-v1";
 let pstore = { stats: {}, exams: [] };
 try { const raw = JSON.parse(localStorage.getItem(PPKEY)); if (raw && raw.stats) pstore = Object.assign(pstore, raw); } catch (e) {}
+pstore.timedExams = pstore.timedExams === true;
 const psave = () => { try { localStorage.setItem(PPKEY, JSON.stringify(pstore)); } catch (e) {} };
 let gprefs = { lang: "en" };
 try { const raw = JSON.parse(localStorage.getItem(GKEY)); if (raw) gprefs = Object.assign(gprefs, raw); } catch (e) {}
@@ -61,10 +62,22 @@ const EXAM_GROUPS = [
 const COURSE_EXAMS = EXAM_GROUPS.flatMap(group => group.exams);
 const EXAM_BY_ID = Object.fromEntries(COURSE_EXAMS.map(exam => [exam.id, exam]));
 const ALL_EXAM_QUESTIONS = COURSE_EXAMS.flatMap(set => set.questions);
+const EXAM_SECONDS_PER_QUESTION = 45;
+function examDurationLabel(questionCount) {
+  const minutes = Math.ceil(questionCount * EXAM_SECONDS_PER_QUESTION / 60);
+  const hours = Math.floor(minutes / 60), remainder = minutes % 60;
+  return hours ? `${hours} hr${hours === 1 ? "" : "s"}${remainder ? ` ${remainder} min` : ""}` : `${minutes} min`;
+}
+function examTimerChoiceHtml(id) {
+  return `<label class="exam-timing" for="${id}">
+    <input id="${id}" type="checkbox" data-exam-timer ${pstore.timedExams ? "checked" : ""}>
+    <span><strong>Timed exams</strong><small>45 seconds per question · 60 minutes for 80 questions</small></span>
+  </label>`;
+}
 function examTileHtml(exam, attr, index) {
   return `<div class="exam-card">
     <button class="exam-tile" type="button" ${attr}="${exam.id}">
-      <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(exam.shortLabel)}</b><small>${exam.questions.length} questions · Untimed</small></span><span class="exam-arrow" aria-hidden="true">→</span>
+      <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(exam.shortLabel)}</b><small data-exam-time="${exam.questions.length}">${exam.questions.length} questions · ${pstore.timedExams ? examDurationLabel(exam.questions.length) : "Untimed"}</small></span><span class="exam-arrow" aria-hidden="true">→</span>
     </button>
     <div class="exam-downloads"><a href="${exam.pdfUrl}" download="${exam.pdfUrl.split("/").pop()}" aria-label="Download ${esc(exam.label)} question PDF">Exam PDF</a><a href="${exam.answerKeyUrl}" download="${exam.answerKeyUrl.split("/").pop()}" aria-label="Download ${esc(exam.label)} answer key PDF">Answer key</a></div>
   </div>`;
@@ -80,7 +93,7 @@ function examGroupsHtml(attr) {
 }
 function examBankTileHtml(attr) {
   return `<button class="exam-tile exam-bank" type="button" ${attr}="exam-bank">
-    <span class="exam-number">↻</span><span class="exam-copy"><b>Question bank mock</b><small>Random 80 questions · Untimed</small></span><span class="exam-arrow" aria-hidden="true">→</span>
+    <span class="exam-number">↻</span><span class="exam-copy"><b>Question bank mock</b><small data-exam-time="80">Random 80 questions · ${pstore.timedExams ? examDurationLabel(80) : "Untimed"}</small></span><span class="exam-arrow" aria-hidden="true">→</span>
   </button><p class="exam-note">The mock is randomized each time, so printable PDFs are available for the 18 fixed course exams.</p>`;
 }
 const ICON = {
@@ -137,7 +150,7 @@ function route() {
   if (view === "guide") openGuideView(r.sub, r.q, prev !== "guide");
   if (view !== "game" && watch.on) watchPause(true);
   const after = afterRoute; afterRoute = null;
-  if (view === "practice") { if (after) after(); else if (!P || P.done || prev !== "practice") renderPractice(); window.scrollTo({ top: 0 }); }
+  if (view === "practice") { if (after) after(); else if (P && P.done && P.timedOut) showPResults(true); else if (!P || P.done || prev !== "practice") renderPractice(); window.scrollTo({ top: 0 }); }
   if (view === "game") { if (after) after(); else if (prev !== "game") renderAll(false); window.scrollTo({ top: 0 }); }
   document.title = { home: "Scrum Master on Duty", guide: "Scrum Guide · Scrum Master on Duty", practice: "Exam practice · Scrum Master on Duty", game: "Game · Scrum Master on Duty" }[view];
 }
@@ -171,8 +184,9 @@ function renderHome() {
       </section>
       </div>
       <section class="entry exam-entry" aria-labelledby="h-prac">
-        <div class="exam-heading"><div><span class="exam-kicker">Untimed practice</span><h2 id="h-prac">Choose an exam</h2></div><span class="exam-count">18 exams</span></div>
-        <p>Choose a course, then open any exam when you’re ready. No timer—take your time.</p>
+        <div class="exam-heading"><div><span class="exam-kicker">Optional timer</span><h2 id="h-prac">Choose an exam</h2></div><span class="exam-count">18 exams</span></div>
+        <p>Choose a course and decide whether you want to take the exam with a countdown.</p>
+        ${examTimerChoiceHtml("homeExamTimer")}
         <div class="exam-groups">${examGroupsHtml("data-home")}</div>
         <div class="exam-random"><span class="exam-kicker">Mix it up</span>${examBankTileHtml("data-home")}</div>
       </section>
@@ -201,6 +215,20 @@ document.addEventListener("click", e => {
   if (k === "mistakes") go("practice", () => guardExam(() => startPractice({ ids: mistakes().map(q => q.id), label: "My mistakes" })));
   if (k === "blitz") go("game", () => { if (watch.on) watchStop(); startBlitz("title"); });
   if (k === "watch") go("game", watchStart);
+});
+function updateExamTimerChoices() {
+  document.querySelectorAll("[data-exam-timer]").forEach(input => { input.checked = pstore.timedExams; });
+  document.querySelectorAll("[data-exam-time]").forEach(label => {
+    const count = Number(label.dataset.examTime);
+    const random = label.closest(".exam-bank");
+    label.textContent = `${random ? "Random " : ""}${count} questions · ${pstore.timedExams ? examDurationLabel(count) : "Untimed"}`;
+  });
+}
+document.addEventListener("change", e => {
+  if (!e.target.matches("[data-exam-timer]")) return;
+  pstore.timedExams = e.target.checked;
+  psave();
+  updateExamTimerChoices();
 });
 
 // ---------- Scrum Guide reader ----------
@@ -375,8 +403,9 @@ function renderPractice() {
       <button class="ptile" type="button" data-p="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round</span></button>
     </div>
     <section class="pcard exam-entry" aria-labelledby="examPracticeHeading">
-      <div class="exam-heading"><div><span class="exam-kicker">Untimed practice</span><h2 id="examPracticeHeading">Course exams</h2></div><span class="exam-count">18 exams</span></div>
+      <div class="exam-heading"><div><span class="exam-kicker">Optional timer</span><h2 id="examPracticeHeading">Course exams</h2></div><span class="exam-count">18 exams</span></div>
       <p>Pick an exam from one of your three course collections. Your answers are saved as you go.</p>
+      ${examTimerChoiceHtml("practiceExamTimer")}
       <div class="exam-groups">${examGroupsHtml("data-p")}</div>
       <div class="exam-random"><span class="exam-kicker">Mix it up</span>${examBankTileHtml("data-p")}</div>
     </section>
@@ -397,10 +426,10 @@ document.addEventListener("click", e => {
   if (k === "exam-bank") guardExam(() => startExam());
   if (EXAM_BY_ID[k]) guardExam(() => startExam(EXAM_BY_ID[k]));
   if (k === "mistakes") guardExam(() => startPractice({ ids: mistakes().map(q => q.id), label: "My mistakes" }));
-  if (k === "leaveyes") { const f = P.pending; P = null; saveExam(); f(); return; }
+  if (k === "leaveyes") { const f = P.pending; clearExamTimer(); P = null; saveExam(); f(); return; }
   if (k === "blitz") go("game", () => { if (watch.on) watchStop(); startBlitz("title"); });
   if (k === "askreset") $("presetRow").innerHTML = `<div class="confirm"><span>Clear all practice answers and mock exam results in this browser?</span><div class="row"><button class="pbtn" type="button" data-p="reset">Yes, reset</button><button class="pbtn" type="button" data-p="noreset">Cancel</button></div></div>`;
-  if (k === "reset") { pstore = { stats: {}, exams: [] }; psave(); renderPractice(); }
+  if (k === "reset") { pstore = { stats: {}, exams: [], timedExams: pstore.timedExams }; psave(); renderPractice(); }
   if (k === "noreset") renderPractice();
   if (k === "act") pAct();
   if (k === "prev") { if (P.i > 0) { P.i--; renderPQ(); } }
@@ -408,9 +437,9 @@ document.addEventListener("click", e => {
   if (k === "quit") { P.confirm = "quit"; renderPQ(); }
   if (k === "submit") { P.confirm = "submit"; renderPQ(); }
   if (k === "cancel") { P.confirm = null; P.pending = null; renderPQ(); }
-  if (k === "quityes") { P = null; saveExam(); renderPractice(); window.scrollTo({ top: 0 }); }
+  if (k === "quityes") { clearExamTimer(); P = null; saveExam(); renderPractice(); window.scrollTo({ top: 0 }); }
   if (k === "submityes") finishExam();
-  if (k === "home") { P = null; renderPractice(); window.scrollTo({ top: 0 }); }
+  if (k === "home") { clearExamTimer(); P = null; renderPractice(); window.scrollTo({ top: 0 }); }
   if (k === "again") startPractice(P.again);
   if (k === "redo") startPractice({ ids: P.wrongIds, label: "Your mistakes from this round" });
   if (k === "readguide") { if (P && P.done) P.resultsHtml = $("pmain").innerHTML; guideReturn = "practice"; go("guide/" + b.dataset.sec); }
@@ -421,7 +450,7 @@ function guardExam(f) {
   f();
 }
 function saveExam() {
-  pstore.exam = P && P.mode === "exam" && !P.done ? { ids: P.items.map(it => it.q.id), order: P.items.map(it => it.order), picked: P.items.map(it => it.picked), flags: [...P.flags], i: P.i, label: P.label, examId: P.examId } : null;
+  pstore.exam = P && P.mode === "exam" && !P.done ? { ids: P.items.map(it => it.q.id), order: P.items.map(it => it.order), picked: P.items.map(it => it.picked), flags: [...P.flags], i: P.i, label: P.label, examId: P.examId, deadline: P.deadline || null } : null;
   psave();
 }
 function restoreExam() {
@@ -429,7 +458,8 @@ function restoreExam() {
   const items = e.ids.map((id, k) => QBYID[id] && { q: QBYID[id], order: e.order[k], picked: e.picked[k] || [], checked: false });
   if (items.some(x => !x)) { pstore.exam = null; psave(); return; }
   const examId = e.examId || "exam-bank";
-  P = { mode: "exam", label: EXAM_BY_ID[examId]?.label || e.label || "Question bank mock", examId, items, i: e.i || 0, flags: new Set(e.flags || []) };
+  P = { mode: "exam", label: EXAM_BY_ID[examId]?.label || e.label || "Question bank mock", examId, items, i: e.i || 0, flags: new Set(e.flags || []), deadline: e.deadline || null };
+  if (P.deadline) startExamTimer();
 }
 function pickWeighted(pool, n) {
   const w = q => { const s = pstore.stats[q.id]; if (!s) return 3; const last = s.h[s.h.length - 1]; return last === 0 ? 5 : 1 + (s.h.length < 2 ? 1 : 0); };
@@ -452,8 +482,9 @@ function startPractice(opt) {
 }
 function startExam(examSet) {
   const questions = examSet ? examSet.questions : shuffle(QS).slice(0, 80);
-  P = { mode: "exam", label: examSet ? examSet.label : "Exam 7 · Question bank", examId: examSet ? examSet.id : "exam-bank", items: questions.map(makeItem), i: 0, flags: new Set() };
-  saveExam(); renderPQ(); window.scrollTo({ top: 0 });
+  const deadline = pstore.timedExams ? Date.now() + questions.length * EXAM_SECONDS_PER_QUESTION * 1000 : null;
+  P = { mode: "exam", label: examSet ? examSet.label : "Exam 7 · Question bank", examId: examSet ? examSet.id : "exam-bank", items: questions.map(makeItem), i: 0, flags: new Set(), deadline };
+  saveExam(); renderPQ(); startExamTimer(); window.scrollTo({ top: 0 });
 }
 function chatHtml(s) {
   return `<div class="qchat"><span class="lbl">Team chat</span>${linesHtml(s.filter(l => LOOK[l[0]]), false)}</div>`;
@@ -464,11 +495,47 @@ function pquoteHtml(q) {
   const ref = q.sourceLabel ? esc(q.sourceLabel) : q.examSource ? esc(q.r) : `Scrum Guide 2020 · ${esc(q.r)}`;
   return `<div class="pquote"><span class="ref">${ref}</span>${(q.g || []).map(g => `<q>${esc(g)}</q>`).join("")}${sec ? `<button type="button" class="linkbtn" data-pact="readguide" data-sec="${sec}">Read this section in the Guide</button>` : ""}</div>`;
 }
+let examTimerInterval = null;
+function clearExamTimer() {
+  if (examTimerInterval !== null) clearInterval(examTimerInterval);
+  examTimerInterval = null;
+}
+function formatExamTime(milliseconds) {
+  const total = Math.ceil(Math.max(0, milliseconds) / 1000);
+  const hours = Math.floor(total / 3600), minutes = Math.floor(total % 3600 / 60), seconds = total % 60;
+  return [hours, minutes, seconds].map(value => String(value).padStart(2, "0")).join(":");
+}
+function examTimerHtml() {
+  if (!P.deadline) return `<span class="exam-status exam-untimed">Untimed</span>`;
+  const remaining = Math.max(0, P.deadline - Date.now());
+  const urgency = remaining <= 60_000 ? "urgent" : remaining <= 300_000 ? "warning" : "";
+  return `<span class="exam-status exam-timer ${urgency}" id="examTimer" role="timer" aria-label="Time remaining ${formatExamTime(remaining)}">${formatExamTime(remaining)}</span>`;
+}
+function startExamTimer() {
+  clearExamTimer();
+  if (!P || P.mode !== "exam" || P.done || !P.deadline) return;
+  const tick = () => {
+    if (!P || P.mode !== "exam" || P.done || !P.deadline) { clearExamTimer(); return; }
+    const remaining = P.deadline - Date.now(), timer = document.getElementById("examTimer");
+    if (timer) {
+      timer.textContent = formatExamTime(remaining);
+      timer.setAttribute("aria-label", `Time remaining ${formatExamTime(remaining)}`);
+      timer.classList.toggle("warning", remaining <= 300_000 && remaining > 60_000);
+      timer.classList.toggle("urgent", remaining <= 60_000);
+    }
+    if (remaining <= 0) {
+      P.timedOut = true;
+      finishExam();
+    }
+  };
+  tick();
+  if (P && !P.done) examTimerInterval = setInterval(tick, 1000);
+}
 function renderPQ() {
   const it = P.items[P.i], q = it.q, ex = P.mode === "exam", multi = q.a.length > 1;
   const answered = P.items.filter(x => x.picked.length === x.q.a.length).length;
   let h = `<div class="pcard">
-    <div class="qhead"><span class="mode">${ex ? esc(P.label) : "Practice · " + esc(P.label)}</span><span class="hint">Question ${P.i + 1} of ${P.items.length}</span><span class="sp"></span>${ex ? `<span class="exam-untimed">Untimed</span>` : ""}<button class="pbtn" type="button" data-pact="quit">Quit</button></div>
+    <div class="qhead"><span class="mode">${ex ? esc(P.label) : "Practice · " + esc(P.label)}</span><span class="hint">Question ${P.i + 1} of ${P.items.length}</span><span class="sp"></span>${ex ? examTimerHtml() : ""}<button class="pbtn" type="button" data-pact="quit">Quit</button></div>
     <div class="qbar"><i style="width:${(ex ? answered : P.i + (it.checked ? 1 : 0)) / P.items.length * 100}%"></i></div>
     <div class="qmeta"><span>${esc(QB.topics[q.t])}</span>${multi ? `<span class="choose">Choose ${q.a.length}</span>` : ""}</div>
     ${q.s ? chatHtml(q.s) : ""}
@@ -511,6 +578,7 @@ function pAct() {
 function finishPractice() { showPResults(false); }
 function finishExam() {
   if (!P || P.done) return;
+  clearExamTimer();
   P.items.forEach(it => { if (it.picked.length) record(it.q.id, sameSet(it.picked, it.q.a)); });
   const ok = P.items.filter(it => sameSet(it.picked, it.q.a)).length;
   const d = new Date(); pstore.exams.push({ date: d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }), score: Math.round(ok / P.items.length * 100), label: P.label });
@@ -524,6 +592,7 @@ function showPResults(exam) {
   const wrong = P.items.filter(it => !sameSet(it.picked, it.q.a)); P.wrongIds = wrong.map(it => it.q.id);
   $("pmain").innerHTML = `<div class="pcard">
     <span class="hint" style="text-transform:uppercase;letter-spacing:.1em;font-weight:700">${exam ? `${esc(P.label)} · exam result` : "Practice result · " + esc(P.label)}</span>
+    ${exam && P.timedOut ? `<p class="exam-timeup">Time is up. Unanswered questions count as incorrect.</p>` : ""}
     <div class="row" style="gap:18px"><span class="bigpct">${pct}%</span><span class="pverdict ${pass ? "pass" : "fail"}">${exam ? (pass ? "Pass" : "Below pass mark") : (pass ? "Exam level" : "Keep practising")}</span></div>
     <span>${ok} of ${n} correct · PSM I pass mark is 85%</span>
     <div class="ptopics">${Object.entries(by).map(([t, [a, m]]) => { const p = Math.round(a / m * 100); return `<div class="ptopic"><div><div class="nm">${esc(QB.topics[t])}</div><div class="sb">${a} of ${m} correct</div></div><div class="meterbar"><i style="width:${p}%"></i></div><span class="pct">${p}%</span></div>`; }).join("")}</div>

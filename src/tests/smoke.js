@@ -52,6 +52,23 @@ const OUT = shotsDir + "/app-";
     await page.click('#pmain [data-pact="quit"]'); await page.click('#pmain [data-pact="quityes"]'); await page.waitForTimeout(200);
     await page.click(".brand"); await page.waitForTimeout(200);
   }
+  await page.locator("#homeExamTimer").check();
+  await page.locator("#v-home .exam-group").nth(1).locator("summary").click();
+  if (!(await page.locator('#v-home [data-home="exam-psm-1"] .exam-copy small').textContent()).includes("2 hrs 15 min")) errs.push("TIMED EXAM duration does not scale to 45 seconds per question");
+  await page.click('#v-home [data-home="exam-psm-1"]'); await page.waitForTimeout(300);
+  let timedExam = await page.evaluate(() => ({ remaining: P.deadline - Date.now(), display: document.querySelector("#examTimer")?.textContent }));
+  if (timedExam.remaining > 8100000 || timedExam.remaining < 8095000 || !/^02:1[45]:\d\d$/.test(timedExam.display || "")) errs.push(`180-question exam timer is not 2h 15m: ${JSON.stringify(timedExam)}`);
+  await page.evaluate(() => { location.hash = "#practice"; });
+  await page.waitForTimeout(150);
+  await page.reload(); await page.waitForTimeout(350);
+  timedExam = await page.evaluate(() => ({ active: P && !P.done, display: document.querySelector("#examTimer")?.textContent, deadline: P && P.deadline }));
+  if (!timedExam.active || !timedExam.display || !timedExam.deadline) errs.push(`TIMED EXAM did not resume after reload: ${JSON.stringify(timedExam)}`);
+  await page.evaluate(() => { P.deadline = Date.now() + 100; saveExam(); startExamTimer(); });
+  await page.waitForTimeout(1200);
+  if (!(await page.locator("#pmain").innerText()).includes("Time is up. Unanswered questions count as incorrect.")) errs.push("TIMED EXAM did not auto-submit at timeout");
+  await page.click('#pmain [data-pact="home"]'); await page.waitForTimeout(150);
+  await page.click(".brand"); await page.waitForTimeout(250);
+  await page.locator("#homeExamTimer").uncheck();
   // guide search
   await page.fill("#hq", "Definition of Done"); await page.press("#hq", "Enter");
   await page.waitForTimeout(600);

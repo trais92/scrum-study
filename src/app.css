@@ -57,6 +57,11 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .exam-heading > div { display: grid; gap: 6px; }
 .exam-count { flex: none; padding: 6px 10px; border-radius: 99px; background: var(--ink); color: var(--panel); font: 700 12px var(--f-mono); white-space: nowrap; }
 .exam-entry > p { margin-top: -4px; color: var(--muted); font-size: 14px; }
+.exam-timing { display: flex; align-items: center; gap: 10px; width: fit-content; max-width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); cursor: pointer; }
+.exam-timing input { width: 18px; height: 18px; flex: none; margin: 0; accent-color: var(--accent); }
+.exam-timing span { display: grid; gap: 2px; }
+.exam-timing strong { font-size: 13px; }
+.exam-timing small { color: var(--muted); font-size: 11px; line-height: 1.3; }
 .exam-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .exam-groups { display: grid; gap: 9px; }
 .exam-group { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--panel) 82%, var(--accent-soft)); }
@@ -85,7 +90,12 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .exam-bank { border-color: var(--ink); background: var(--ink); color: var(--panel); }
 .exam-bank .exam-number { background: var(--accent); }
 .exam-bank .exam-copy small { color: inherit; opacity: .74; }
-.exam-untimed { flex: none; padding: 4px 8px; border-radius: 99px; background: var(--good-soft); color: var(--good); font: 700 11px var(--f-mono); }
+.exam-status { flex: none; padding: 4px 8px; border-radius: 99px; font: 700 11px var(--f-mono); }
+.exam-untimed { background: var(--good-soft); color: var(--good); }
+.exam-timer { background: var(--accent-soft); color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+.exam-timer.warning { background: var(--accent); color: var(--ink); }
+.exam-timer.urgent { background: var(--bad-soft); color: var(--bad); }
+.exam-timeup { padding: 10px 12px; border-radius: 9px; background: var(--bad-soft); color: var(--bad); font-weight: 700; }
 .bigsearch { display: flex; align-items: center; gap: 8px; border: 2px solid var(--ink); border-radius: 12px; background: var(--panel); padding: 4px 4px 4px 12px; }
 .bigsearch:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 .bigsearch svg { width: 20px; height: 20px; flex: none; color: var(--muted); }
@@ -407,7 +417,7 @@ a.primary { text-decoration: none; }
   .qhead .mode { grid-column: 1; }
   .qhead .hint { grid-column: 1; grid-row: 2; }
   .qhead .sp { display: none; }
-  .qhead .exam-untimed, .qhead [data-pact="quit"] { grid-row: 1 / span 2; }
+  .qhead .exam-status, .qhead [data-pact="quit"] { grid-row: 1 / span 2; }
   .qnav .sp { display: none; }
   .qnav .primary { order: -1; flex: 1 1 100%; }
   .qnav .pbtn { flex: 1 1 auto; }

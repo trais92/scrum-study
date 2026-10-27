@@ -4,7 +4,7 @@ A free PSM I study kit that runs in any browser, with no sign-up:
 
 - **Scrum Guide 2020**: the full text in English and in the official German translation, searchable, with explained terms.
 - **Practice**: smart rounds, rounds by topic, mistakes review, plus separate Product Owner and Scrum Master question banks.
-- **Exams**: 18 untimed exams in three course groups—Scrum Course 1, Scrum Course 2, and Product Owner Course—plus a random 80-question mock from the question bank.
+- **Exams**: 18 exams in three course groups—Scrum Course 1, Scrum Course 2, and Product Owner Course—with an optional countdown of 45 seconds per question (60 minutes for 80 questions), plus a random 80-question mock from the question bank.
 - **Game**: three Sprints as the Scrum Master of a small web team, with an animated office and a "Watch a Sprint" mode.
 
 Open it: https://trais92.github.io/scrum-study/
