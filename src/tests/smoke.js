@@ -158,7 +158,7 @@ const OUT = shotsDir + "/app-";
   }
   await page.screenshot({ path: OUT + tag + "-practice-dash.png", fullPage: true }); await ov("pdash");
   const saveHelpText = await page.locator("#pmain .save-help").innerText();
-  if (!saveHelpText.includes("localStorage") || !saveHelpText.includes("normal browser tab")) throw new Error("mock exam save help missing from practice page");
+  if (!saveHelpText.includes("browser on this device") || !saveHelpText.includes("private browsing") || !saveHelpText.includes("Clearing browser data")) throw new Error("mock exam save help missing storage and data-loss guidance");
   // exam
   if (await page.locator('#pmain [data-p^="exam-"]').count() !== 19) errs.push("EXAM SELECTOR COUNT is not 19");
   if (await page.locator("#pmain .exam-group").count() !== 3 || await page.locator("#pmain .exam-group[open]").count()) errs.push("PRACTICE COURSE GROUPS are not all folded by default");
