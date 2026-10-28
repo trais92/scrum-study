@@ -110,7 +110,7 @@ document.addEventListener("click", e => {
   const h = e.target.closest("[data-home]"); if (!h || h.disabled) return;
   const k = h.dataset.home;
   if (k === "smart") go("practice", () => guardExam(() => startPractice({})));
-  if (k === "exam") go("practice", () => guardExam(startExam));
+  if (k === "exam") go("practice", () => guardExam(showExamStart));
   if (k === "mistakes") go("practice", () => guardExam(() => startPractice({ ids: mistakes().map(q => q.id), label: "My mistakes" })));
   if (k === "blitz") go("game", () => { if (watch.on) watchStop(); startBlitz("title"); });
   if (k === "watch") go("game", watchStart);
@@ -282,6 +282,7 @@ function renderPractice() {
   const mk = mistakes().length;
   $("pmain").innerHTML = `
     <div class="sechead"><h1 class="ptitle">Exam practice</h1><a class="chip" href="#guide">${ICON.book.replace('aria-hidden="true"', 'aria-hidden="true" style="width:14px;height:14px;vertical-align:-2px"')} Scrum Guide</a></div>
+    <section class="pcard save-help"><h2>How to have my progress saved</h2>${examSaveHelp()}</section>
     <div class="practice-row">
       <button class="ptile" type="button" data-p="smart"><b>${ICON.bolt}Smart round</b><span>10 questions</span></button>
       <button class="ptile" type="button" data-p="exam"><b>${ICON.clock}Mock exam</b><span>80 questions · 60 min</span></button>
@@ -326,6 +327,19 @@ document.addEventListener("click", e => {
 function guardExam(f) {
   if (P && P.mode === "exam" && !P.done) { P.confirm = "leave"; P.pending = f; renderPQ(); window.scrollTo({ top: 0 }); return; }
   f();
+}
+function showExamStart() {
+  if (P && P.mode !== "exam" && !P.done) P = null;
+  renderPractice();
+  window.scrollTo({ top: 0 });
+}
+function examSaveHelp() {
+  return `<div class="save-copy">
+    <p>This exam is saved automatically in this browser's localStorage—not in cookies or on a server.</p>
+    <p>While it's in progress, question order, answers, flags, current question and deadline are saved as you work. The timer keeps running while the page is closed.</p>
+    <p>Completed history stores the date and score, not a full answer-by-answer record.</p>
+    <p>Progress stays in this browser on this device. Private browsing may discard it at the end of the session, and clearing website data removes it. Use a normal browser tab and the same browser/device to resume.</p>
+  </div>`;
 }
 function saveExam() {
   pstore.exam = P && P.mode === "exam" && !P.done ? { ids: P.items.map(it => it.q.id), order: P.items.map(it => it.order), picked: P.items.map(it => it.picked), flags: [...P.flags], end: P.end, i: P.i } : null;
@@ -380,9 +394,11 @@ function pquoteHtml(q) {
 }
 function renderPQ() {
   const it = P.items[P.i], q = it.q, ex = P.mode === "exam", multi = q.a.length > 1;
+  const saveHelpOpen = !!$("pmain").querySelector(".save-help-disclosure[open]");
   const answered = P.items.filter(x => x.picked.length === x.q.a.length).length;
   let h = `<div class="pcard">
     <div class="qhead"><span class="mode">${ex ? "Mock exam" : "Practice · " + esc(P.label)}</span><span class="hint">Question ${P.i + 1} of ${P.items.length}</span><span class="sp"></span>${ex ? `<span class="qtimer" id="qtimer" aria-live="off">60:00</span>` : ""}<button class="pbtn" type="button" data-pact="quit">Quit</button></div>
+    ${ex ? `<details class="save-help-disclosure"${saveHelpOpen ? " open" : ""}><summary>How to have my progress saved</summary>${examSaveHelp()}</details>` : ""}
     <div class="qbar"><i style="width:${(ex ? answered : P.i + (it.checked ? 1 : 0)) / P.items.length * 100}%"></i></div>
     <div class="qmeta"><span>${esc(QB.topics[q.t])}</span>${multi ? `<span class="choose">Choose ${q.a.length}</span>` : ""}</div>
     ${q.s ? chatHtml(q.s) : ""}
@@ -405,6 +421,8 @@ function renderPQ() {
   if (ex) h += `<div><span class="hint">${answered} of ${P.items.length} answered · ${P.flags.size} flagged</span><div class="qmap" style="margin-top:6px">${P.items.map((x, i) => `<button type="button" class="${[x.picked.length === x.q.a.length ? "done" : "", P.flags.has(i) ? "flag" : "", i === P.i ? "cur" : ""].join(" ")}" data-go="${i}" aria-label="Question ${i + 1}">${i + 1}</button>`).join("")}</div></div>`;
   h += `</div>`;
   $("pmain").innerHTML = h;
+  const saveHelp = $("pmain").querySelector(".save-help-disclosure");
+  if (saveHelp && saveHelpOpen) saveHelp.open = true;
   pTick();
 }
 function pPick(oi) {

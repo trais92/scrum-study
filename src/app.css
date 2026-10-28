@@ -148,6 +148,13 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .histrow { display: flex; flex-wrap: wrap; gap: 6px; }
 .hchip { font-family: var(--f-mono); font-size: 12px; padding: 3px 8px; border-radius: 99px; }
 .hchip.pass { background: var(--good-soft); color: var(--good); } .hchip.fail { background: var(--bad-soft); color: var(--bad); }
+.save-help { gap: 8px; }
+.save-help h2 { font-size: 18px; }
+.save-copy { display: grid; gap: 6px; color: var(--muted); font-size: 13.5px; line-height: 1.45; }
+.save-copy p { margin: 0; }
+.save-help-disclosure { font-size: 13px; color: var(--muted); }
+.save-help-disclosure summary { cursor: pointer; font-weight: 700; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+.save-help-disclosure .save-copy { margin-top: 8px; }
 .qhead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .qhead .mode { font-weight: 700; }
 .qhead .sp { flex: 1; }

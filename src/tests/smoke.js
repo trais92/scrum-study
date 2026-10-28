@@ -16,6 +16,9 @@ const OUT = shotsDir + "/app-";
   await page.goto(appUrl);
   await page.waitForTimeout(1500);
   await page.screenshot({ path: OUT + tag + "-home.png", fullPage: true }); await ov("home");
+  await page.click('#v-home [data-home="exam"]'); await page.waitForTimeout(300);
+  if (!await page.locator("#pmain .save-help").isVisible()) throw new Error("home mock exam entry skipped the save explanation");
+  await page.click(".brand"); await page.waitForTimeout(300);
   // guide search
   await page.fill("#hq", "Definition of Done"); await page.press("#hq", "Enter");
   await page.waitForTimeout(600);
@@ -59,8 +62,12 @@ const OUT = shotsDir + "/app-";
   await page.click('#pmain [data-pact="quit"]').catch(() => {}); await page.click('#pmain [data-pact="quityes"]').catch(() => {});
   await page.waitForTimeout(300);
   await page.screenshot({ path: OUT + tag + "-practice-dash.png", fullPage: true }); await ov("pdash");
+  const saveHelpText = await page.locator("#pmain .save-help").innerText();
+  if (!saveHelpText.includes("localStorage") || !saveHelpText.includes("normal browser tab")) throw new Error("mock exam save help missing from practice page");
   // exam
   await page.click('#pmain [data-p="exam"]'); await page.waitForTimeout(300);
+  await page.locator("#pmain .save-help-disclosure summary").click();
+  if (!await page.locator("#pmain .save-help-disclosure .save-copy").isVisible()) throw new Error("mock exam save help unavailable while exam is running");
   await page.screenshot({ path: OUT + tag + "-exam.png", fullPage: mode === "phone" }); await ov("exam");
   await page.click('#pmain [data-pact="submit"]'); await page.click('#pmain [data-pact="submityes"]'); await page.waitForTimeout(300);
   await page.screenshot({ path: OUT + tag + "-exam-res.png" });
