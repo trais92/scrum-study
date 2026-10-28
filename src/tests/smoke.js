@@ -157,6 +157,8 @@ const OUT = shotsDir + "/app-";
     await page.click('#pmain [data-pact="quit"]'); await page.click('#pmain [data-pact="quityes"]'); await page.waitForTimeout(200);
   }
   await page.screenshot({ path: OUT + tag + "-practice-dash.png", fullPage: true }); await ov("pdash");
+  const saveHelpText = await page.locator("#pmain .save-help").innerText();
+  if (!saveHelpText.includes("localStorage") || !saveHelpText.includes("normal browser tab")) throw new Error("mock exam save help missing from practice page");
   // exam
   if (await page.locator('#pmain [data-p^="exam-"]').count() !== 19) errs.push("EXAM SELECTOR COUNT is not 19");
   if (await page.locator("#pmain .exam-group").count() !== 3 || await page.locator("#pmain .exam-group[open]").count()) errs.push("PRACTICE COURSE GROUPS are not all folded by default");
@@ -170,6 +172,8 @@ const OUT = shotsDir + "/app-";
   await page.click('#pmain [data-go="0"]');
   const firstExamQuestion = examData.find(question => question.test === 1 && question.nr === 1);
   for (const [index, answer] of firstExamQuestion.answers.entries()) if (answer.correct) await page.click(`#pmain [data-oi="${index}"]`);
+  await page.locator("#pmain .save-help-disclosure summary").click();
+  if (!await page.locator("#pmain .save-help-disclosure .save-copy").isVisible()) throw new Error("mock exam save help unavailable while exam is running");
   await page.screenshot({ path: OUT + tag + "-exam.png", fullPage: mode === "phone" }); await ov("exam");
   await page.click('#pmain [data-pact="submit"]'); await page.click('#pmain [data-pact="submityes"]'); await page.waitForTimeout(300);
   if (!(await page.locator("#pmain").innerText()).includes("1 of 80 correct")) errs.push("EXAM 1 did not score the keyed first answer as correct");
