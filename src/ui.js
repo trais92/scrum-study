@@ -392,7 +392,7 @@ function quizHtml() {
   const multi = q.a.length > 1;
   let h = `<div class="place"><span class="where">Exam bridge</span><span class="when">Question ${quiz.i + 1} of ${quiz.ids.length}</span></div><div class="scene-body">`;
   if (q.s) h += linesHtml(q.s.filter(l => PEOPLE_KEYS[l[0]]), false);
-  h += `<h2 class="q">${esc(q.q)}</h2>${multi ? `<p class="hint">Choose ${q.a.length}.</p>` : ""}<div class="opts">`;
+  h += `<h2 class="q">${esc(q.q)}</h2>${multi ? `<p class="hint">Choose every correct option.</p>` : ""}<div class="opts">`;
   quiz.order.forEach((i, n) => {
     let cls = "";
     if (quiz.done) cls = q.a.includes(i) ? " right" : quiz.sel.includes(i) ? " wrong" : " dim";
@@ -400,7 +400,7 @@ function quizHtml() {
     h += `<button class="opt${cls}" type="button" data-q="${i}" data-k="${n + 1}" ${quiz.done ? "disabled" : ""}><span class="key">${LETTERS[n]}</span><span>${esc(q.o[i])}</span></button>`;
   });
   h += `</div>`;
-  if (!quiz.done && multi) h += `<div class="row"><button class="primary" type="button" data-main data-act="qcheck" ${quiz.sel.length === q.a.length ? "" : "disabled"}>Check answer</button></div>`;
+  if (!quiz.done && multi) h += `<div class="row"><button class="primary" type="button" data-main data-act="qcheck" ${quiz.sel.length ? "" : "disabled"}>Check answer</button></div>`;
   if (quiz.done) {
     const ok = quiz.sel.length === q.a.length && quiz.sel.every(i => q.a.includes(i));
     h += `<div class="verdict ${ok ? "g2" : "g0"}"><span class="big">${ok ? "Correct" : "Not quite"}</span></div><p class="fbtext">${esc(q.x)}</p>${quotesHtml(q.g.map(t => [t, q.r]))}
@@ -411,7 +411,7 @@ function quizHtml() {
 function quizPick(i) {
   const q = QIDX[quiz.ids[quiz.i]];
   if (quiz.done) return;
-  if (q.a.length > 1) { quiz.sel = quiz.sel.includes(i) ? quiz.sel.filter(x => x !== i) : quiz.sel.length < q.a.length ? [...quiz.sel, i] : quiz.sel; renderScene(); return; }
+  if (q.a.length > 1) { quiz.sel = quiz.sel.includes(i) ? quiz.sel.filter(x => x !== i) : [...quiz.sel, i]; renderScene(); return; }
   quiz.sel = [i]; quizCheck();
 }
 function quizCheck() {

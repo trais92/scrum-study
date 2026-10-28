@@ -544,11 +544,11 @@ function startExamTimer() {
 }
 function renderPQ() {
   const it = P.items[P.i], q = it.q, ex = P.mode === "exam", multi = q.a.length > 1;
-  const answered = P.items.filter(x => x.picked.length === x.q.a.length).length;
+  const answered = P.items.filter(x => x.picked.length > 0).length;
   let h = `<div class="pcard">
     <div class="qhead"><span class="mode">${ex ? esc(P.label) : "Practice · " + esc(P.label)}</span><span class="hint">Question ${P.i + 1} of ${P.items.length}</span><span class="sp"></span>${ex ? examTimerHtml() : ""}<button class="pbtn" type="button" data-pact="quit">Quit</button></div>
     <div class="qbar"><i style="width:${(ex ? answered : P.i + (it.checked ? 1 : 0)) / P.items.length * 100}%"></i></div>
-    <div class="qmeta"><span>${esc(QB.topics[q.t])}</span>${multi ? `<span class="choose">Choose ${q.a.length}</span>` : ""}</div>
+    <div class="qmeta"><span>${esc(QB.topics[q.t])}</span>${multi ? `<span class="choose">Choose every correct option</span>` : ""}</div>
     ${q.s ? chatHtml(q.s) : ""}
     <p class="qtext">${esc(q.q)}</p>
     <div class="popts">${it.order.map((oi, n) => {
@@ -564,9 +564,9 @@ function renderPQ() {
   if (P.confirm === "quit") h += `<div class="confirm"><span>${ex ? `Quit ${esc(P.label)}? It won't be scored.` : "Quit this round? Answers you already checked are saved."}</span><div class="row"><button class="pbtn" type="button" data-pact="quityes">Quit</button><button class="pbtn" type="button" data-pact="cancel">Keep going</button></div></div>`;
   if (P.confirm === "submit") { const open = P.items.length - answered; h += `<div class="confirm"><span>${open ? `${open} question${open > 1 ? "s are" : " is"} unanswered and ${P.flags.size} flagged. Submit anyway?` : `All questions answered${P.flags.size ? `, ${P.flags.size} still flagged` : ""}. Submit your exam?`}</span><div class="row"><button class="pbtn" type="button" data-pact="submityes">Submit</button><button class="pbtn" type="button" data-pact="cancel">Not yet</button></div></div>`; }
   const actLbl = ex ? (P.i === P.items.length - 1 ? "Review and submit" : "Next") : it.checked ? (P.i === P.items.length - 1 ? "See results" : "Next question") : "Check answer";
-  const actDis = !ex && !it.checked && it.picked.length !== q.a.length;
+  const actDis = !ex && !it.checked && it.picked.length === 0;
   h += `<div class="qnav">${ex ? `<button class="pbtn" type="button" data-pact="prev" ${P.i === 0 ? "disabled" : ""}>Back</button><button class="pbtn" type="button" data-pact="flag">${P.flags.has(P.i) ? "Remove flag" : "Flag for review"}</button>` : ""}<span class="sp"></span>${ex ? `<button class="pbtn" type="button" data-pact="submit">Submit exam</button>` : ""}<button class="primary" type="button" data-pact="act" ${actDis ? "disabled" : ""}>${actLbl}</button></div>`;
-  if (ex) h += `<div><span class="hint">${answered} of ${P.items.length} answered · ${P.flags.size} flagged</span><div class="qmap" style="margin-top:6px">${P.items.map((x, i) => `<button type="button" class="${[x.picked.length === x.q.a.length ? "done" : "", P.flags.has(i) ? "flag" : "", i === P.i ? "cur" : ""].join(" ")}" data-go="${i}" aria-label="Question ${i + 1}">${i + 1}</button>`).join("")}</div></div>`;
+  if (ex) h += `<div><span class="hint">${answered} of ${P.items.length} answered · ${P.flags.size} flagged</span><div class="qmap" style="margin-top:6px">${P.items.map((x, i) => `<button type="button" class="${[x.picked.length > 0 ? "done" : "", P.flags.has(i) ? "flag" : "", i === P.i ? "cur" : ""].join(" ")}" data-go="${i}" aria-label="Question ${i + 1}">${i + 1}</button>`).join("")}</div></div>`;
   h += `</div>`;
   $("pmain").innerHTML = h;
 }
@@ -575,8 +575,7 @@ function pPick(oi) {
   if (it.checked && P.mode === "practice") return;
   if (q.a.length === 1) it.picked = [oi];
   else if (it.picked.includes(oi)) it.picked = it.picked.filter(x => x !== oi);
-  else if (it.picked.length < q.a.length) it.picked = it.picked.concat(oi);
-  else it.picked = it.picked.slice(1).concat(oi);
+  else it.picked = it.picked.concat(oi);
   if (P.mode === "exam") saveExam();
   renderPQ();
 }

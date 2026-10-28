@@ -26,6 +26,37 @@ const OUT = shotsDir + "/app-";
   if (bankCounts.total !== 2111 || bankCounts.po !== 1000 || bankCounts.psm !== 1002) {
     errs.push(`IMPORTED BANK COUNTS are wrong: ${JSON.stringify(bankCounts)}`);
   }
+  const multipleSelection = await page.evaluate(() => {
+    const q = QS.find(question => question.a.length > 1 && question.a.length < question.o.length && !question.s);
+    if (!q) return null;
+    P = { mode: "practice", label: "Format check", items: [makeItem(q)], i: 0, flags: new Set() };
+    pPick(q.a[0]);
+    const checkEnabledWithOne = !document.querySelector('#pmain [data-pact="act"]').disabled;
+    q.o.forEach((_, index) => { if (!P.items[0].picked.includes(index)) pPick(index); });
+    const selected = P.items[0].picked.length;
+    P = null; renderHome();
+    return { checkEnabledWithOne, selected, correctCount: q.a.length, optionCount: q.o.length };
+  });
+  if (!multipleSelection || !multipleSelection.checkEnabledWithOne || multipleSelection.selected !== multipleSelection.optionCount || multipleSelection.selected <= multipleSelection.correctCount) {
+    errs.push(`MULTI-SELECT flow leaks the keyed answer count: ${JSON.stringify(multipleSelection)}`);
+  }
+  const bridgeInstructions = await page.evaluate(() => {
+    const q = Object.values(QIDX).find(question => question.a.length > 1 && question.a.length < question.o.length && !question.s);
+    if (!q) return null;
+    quiz = { ids: [q.id], i: 0, sel: [], done: false, right: 0, order: q.o.map((_, index) => index) };
+    const unselectedHtml = quizHtml();
+    quiz.sel = [q.a[0]];
+    const selectedHtml = quizHtml();
+    const checkButton = selectedHtml.match(/<button[^>]*data-act="qcheck"[^>]*>/);
+    return {
+      genericInstruction: unselectedHtml.includes("Choose every correct option."),
+      exposesNumber: /Choose \d+/.test(unselectedHtml),
+      checkEnabledWithOne: !!checkButton && !checkButton[0].includes("disabled")
+    };
+  });
+  if (!bridgeInstructions || !bridgeInstructions.genericInstruction || bridgeInstructions.exposesNumber || !bridgeInstructions.checkEnabledWithOne) {
+    errs.push(`GAME EXAM BRIDGE exposes answer count or blocks a partial selection: ${JSON.stringify(bridgeInstructions)}`);
+  }
   await page.screenshot({ path: OUT + tag + "-home.png", fullPage: true }); await ov("home");
   if (await page.locator('#v-home [data-home^="exam-"]').count() !== 19) errs.push("HOME EXAM HIGHLIGHT does not show 18 course exams plus the question-bank mock");
   const homeGroups = page.locator("#v-home .exam-group");
@@ -134,6 +165,9 @@ const OUT = shotsDir + "/app-";
   if (await page.locator('#pmain .qmap button').count() !== 80) errs.push("EXAM 1 does not contain 80 questions");
   if ((await page.locator('#pmain .qhead .mode').textContent()).trim() !== "Scrum Course 1 · Exam 1") errs.push("EXAM 1 title is missing");
   if (await page.locator("#pmain .exam-untimed").textContent() !== "Untimed" || await page.locator("#pmain #qtimer").count()) errs.push("EXAM 1 displays a timer");
+  await page.click('#pmain [data-go="3"]');
+  if ((await page.locator("#pmain .qmeta .choose").textContent()).trim() !== "Choose every correct option" || (await page.locator("#pmain .qmeta .choose").textContent()).includes("3")) errs.push("MULTI-SELECT instructions reveal the answer count");
+  await page.click('#pmain [data-go="0"]');
   const firstExamQuestion = examData.find(question => question.test === 1 && question.nr === 1);
   for (const [index, answer] of firstExamQuestion.answers.entries()) if (answer.correct) await page.click(`#pmain [data-oi="${index}"]`);
   await page.screenshot({ path: OUT + tag + "-exam.png", fullPage: mode === "phone" }); await ov("exam");

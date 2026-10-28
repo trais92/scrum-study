@@ -51,7 +51,7 @@ function pageHtml({ course, examNumber, questions, answerKey = false }) {
          return `<section class="key-item"><b>Question ${question.number}</b><div>${answers.join("<br>")}</div></section>`;
        }).join("")}</div>`
     : `<main class="questions">${questions.map(question => `<section class="question">
-         <div class="question-heading"><b>Question ${question.number}</b><span>${question.correct.length > 1 ? `Choose ${question.correct.length} answers` : "Choose 1 answer"}</span></div>
+         <div class="question-heading"><b>Question ${question.number}</b><span>Choose every correct option</span></div>
          <p class="stem">${escapeHtml(question.text)}</p>
          <ul class="options">${question.answers.map((answer, index) => `<li><span class="box" aria-hidden="true"></span><b>${String.fromCharCode(65 + index)}.</b><span>${escapeHtml(answer)}</span></li>`).join("")}</ul>
        </section>`).join("")}</main>`;

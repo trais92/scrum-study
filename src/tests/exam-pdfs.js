@@ -24,6 +24,10 @@ for (const course of courseSets) {
     if ((questionPaper.match(/class="question"/g) || []).length !== questions.length) {
       issues.push(`${course.slug} exam ${exam}: question paper template has the wrong number of questions`);
     }
+    const directions = [...questionPaper.matchAll(/<div class="question-heading">[\s\S]*?<span>(.*?)<\/span>/g)].map(([, text]) => text);
+    if (directions.length !== questions.length || directions.some(text => text !== "Choose every correct option")) {
+      issues.push(`${course.slug} exam ${exam}: question paper reveals the keyed answer count`);
+    }
     if (!questionPaper.includes("class=\"box\"") || questionPaper.includes("class=\"answer-key\"")) {
       issues.push(`${course.slug} exam ${exam}: question paper does not keep answers separate`);
     }

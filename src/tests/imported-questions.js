@@ -6,7 +6,6 @@ const banks = [
   ["psm_1000_fragen.json", 1002, "Scrum Master", [180, 181, 180, 181, 180, 100]]
 ];
 const issues = [];
-let typeCountMismatches = 0;
 
 for (const [file, expectedCount, label, expectedTests] of banks) {
   const filePath = path.join(__dirname, "../../data/imported", file);
@@ -84,7 +83,9 @@ for (const [file, expectedCount, label, expectedTests] of banks) {
       }
     }
     if ((question.type === "multiple-choice" && flagged.length !== 1) ||
-        (question.type === "multi-select" && flagged.length < 2)) typeCountMismatches++;
+        (question.type === "multi-select" && flagged.length < 2)) {
+      issues.push(`${name}: ${question.type} format does not match ${flagged.length} keyed answer(s)`);
+    }
   }
   for (let test = 1; test <= 6; test++) {
     const found = tests.get(test)?.size || 0;
@@ -100,7 +101,4 @@ if (issues.length) {
   process.exitCode = 1;
 } else {
   console.log("Imported question validation passed (six numbered exams each for Product Owner and Scrum Master).");
-  if (typeCountMismatches) {
-    console.log(`Note: ${typeCountMismatches} source type labels do not match the number of keyed answers; keyed answers are retained as supplied.`);
-  }
 }

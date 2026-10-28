@@ -69,6 +69,10 @@ for (const [index, question] of exams.entries()) {
     if (question.correct.some(key => !answerKeys.has(String(key)))) {
       issues.push(`${label}: correct contains an unknown answer key`);
     }
+    if ((question.type === "multiple-choice" && flagged.length !== 1) ||
+        (question.type === "multi-select" && flagged.length < 2)) {
+      issues.push(`${label}: ${question.type} format does not match ${flagged.length} keyed answer(s)`);
+    }
   }
   if (typeof question.section !== "string" || !question.section.trim()) {
     issues.push(`${label}: section must be nonblank`);

@@ -140,7 +140,7 @@
     "test": 1,
     "nr": 5,
     "id": 115288033,
-    "type": "multi-select",
+    "type": "multiple-choice",
     "question": "What is the most important characteristic of a Scrum Team?\n(choose the best answer)",
     "answers": [
       {
@@ -1430,7 +1430,7 @@
     "test": 1,
     "nr": 41,
     "id": 115287973,
-    "type": "multi-select",
+    "type": "multiple-choice",
     "question": "What is the primary purpose of the Scrum Master's presence at the Daily Scrum?\n(choose the best answer)",
     "answers": [
       {
@@ -18399,8 +18399,8 @@
     "test": 3,
     "nr": 180,
     "id": 148187809,
-    "type": "multi-select",
-    "question": "In Scrum, which tools are mandated for the Product Owner to utilize?\n(choose all that apply)",
+    "type": "multiple-choice",
+    "question": "Which statement about tools for the Product Owner is correct?\n(choose the best answer)",
     "answers": [
       {
         "key": "a",

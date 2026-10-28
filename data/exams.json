@@ -8887,8 +8887,8 @@
     "test": 4,
     "nr": 39,
     "id": 54740904,
-    "type": "multi-select",
-    "question": "Which of the following are NOT Scrum Artifacts? Select all applicable answers.",
+    "type": "multiple-choice",
+    "question": "Which of the following is NOT a Scrum Artifact?\n(choose the best answer)",
     "answers": [
       {
         "key": "a",
@@ -8917,8 +8917,8 @@
     "explanation": "Die drei Scrum-Artefakte sind Product Backlog, Sprint Backlog und Increment. Eine Liste der Hindernisse (Impediments) ist kein Scrum-Artefakt.",
     "section": "Scrum Guide (US 2020): Scrum Artifacts (Seite 10-12)",
     "correction": {
-      "kind": "Erklärung",
-      "reason": "Erklärung fehlte bei dieser Mehrfachauswahl mit nur einer richtigen Antwort."
+      "kind": "Format",
+      "reason": "Auf Einfachauswahl und die einzelne richtige Antwort abgestimmt."
     }
   },
   {

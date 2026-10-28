@@ -29640,7 +29640,7 @@
     "test": 5,
     "nr": 143,
     "id": 135346203,
-    "type": "multi-select",
+    "type": "multiple-choice",
     "question": "In which Scrum event are stakeholders formally invited to provide feedback and collaborate with the Scrum Team?\n(choose the best answer)",
     "answers": [
       {
