@@ -29,7 +29,7 @@ const OUT = shotsDir + "/fix-";
   await p.fill("#hq", "Increment"); await p.press("#hq", "Enter"); await p.waitForTimeout(600);
   console.log("search from scrolled home scrollY:", await p.evaluate(() => window.scrollY));
   // M10 exam on phone
-  await p.click('.nav a[data-nav="practice"]'); await p.waitForTimeout(300); await p.click('#pmain [data-p="exam"]'); await p.waitForTimeout(300);
+  await p.click('.nav a[data-nav="practice"]'); await p.waitForTimeout(300); await p.click('#pmain [data-p="exam"]'); await p.click('#pmain [data-p="exam-timed"]'); await p.waitForTimeout(300);
   await p.locator("#pmain [data-oi]").first().click(); await p.click('#pmain [data-pact="act"]'); await p.waitForTimeout(200);
   await p.screenshot({ path: OUT + "exam-phone.png" });
   // M7 exam survives reload; guard on home tile

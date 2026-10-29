@@ -96,7 +96,7 @@ function renderHome() {
       <div class="sechead"><h2 id="h-prac">Exam practice</h2><span class="hint">${QS.length} questions · ${rd.seen} seen${rd.pct !== null ? ` · ${rd.pct}% right lately` : ""}</span></div>
       <div class="practice-row">
         <button class="ptile" type="button" data-home="smart"><b>${ICON.bolt}Smart round</b><span>10 questions</span></button>
-        <button class="ptile" type="button" data-home="exam"><b>${ICON.clock}Mock exam</b><span>80 questions · 60 min</span></button>
+        <button class="ptile" type="button" data-home="exam"><b>${ICON.clock}Mock exam</b><span>80 questions · choose a mode</span></button>
         <button class="ptile" type="button" data-home="mistakes" ${mk ? "" : "disabled"}><b>${ICON.redo}My mistakes</b><span>${mk ? `${mk} to redo` : "None yet"}</span></button>
         <button class="ptile" type="button" data-home="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round</span></button>
       </div>
@@ -285,7 +285,7 @@ function renderPractice() {
     <section class="pcard save-help"><h2>How to have my progress saved</h2>${examSaveHelp()}</section>
     <div class="practice-row">
       <button class="ptile" type="button" data-p="smart"><b>${ICON.bolt}Smart round</b><span>10 questions</span></button>
-      <button class="ptile" type="button" data-p="exam"><b>${ICON.clock}Mock exam</b><span>80 questions · 60 min</span></button>
+      <button class="ptile" type="button" data-p="exam"><b>${ICON.clock}Mock exam</b><span>80 questions · choose a mode</span></button>
       <button class="ptile" type="button" data-p="mistakes" ${mk ? "" : "disabled"}><b>${ICON.redo}My mistakes</b><span>${mk ? `${mk} to redo` : "None yet"}</span></button>
       <button class="ptile" type="button" data-p="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round</span></button>
     </div>
@@ -303,7 +303,10 @@ document.addEventListener("click", e => {
   if (b.dataset.go !== undefined) { P.i = +b.dataset.go; renderPQ(); return; }
   const k = b.dataset.p || b.dataset.pact;
   if (k === "smart") guardExam(() => startPractice({}));
-  if (k === "exam") guardExam(startExam);
+  if (k === "exam") guardExam(showExamStart);
+  if (k === "exam-timed") guardExam(() => startExam("timed"));
+  if (k === "exam-study") guardExam(() => startExam("study"));
+  if (k === "exam-back") renderPractice();
   if (k === "mistakes") guardExam(() => startPractice({ ids: mistakes().map(q => q.id), label: "My mistakes" }));
   if (k === "leaveyes") { const f = P.pending; clearInterval(P.timer); P = null; saveExam(); f(); return; }
   if (k === "blitz") go("game", () => { if (watch.on) watchStop(); startBlitz("title"); });
@@ -319,7 +322,7 @@ document.addEventListener("click", e => {
   if (k === "quityes") { clearInterval(P.timer); P = null; saveExam(); renderPractice(); window.scrollTo({ top: 0 }); }
   if (k === "submityes") finishExam();
   if (k === "home") { P = null; renderPractice(); window.scrollTo({ top: 0 }); }
-  if (k === "again") startPractice(P.again);
+  if (k === "again") P.again && P.again.examMode ? startExam(P.again.examMode) : startPractice(P.again);
   if (k === "redo") startPractice({ ids: P.wrongIds, label: "Your mistakes from this round" });
   if (k === "readguide") { if (P && P.done) P.resultsHtml = $("pmain").innerHTML; guideReturn = "practice"; go("guide/" + b.dataset.sec); }
 });
@@ -331,6 +334,14 @@ function guardExam(f) {
 function showExamStart() {
   if (P && P.mode !== "exam" && !P.done) P = null;
   renderPractice();
+  $("pmain").insertAdjacentHTML("afterbegin", `<section class="pcard">
+    <h2>Choose your exam mode</h2>
+    <div class="practice-row">
+      <button class="ptile" type="button" data-p="exam-timed"><b>${ICON.clock}Timed mock exam</b><span>80 questions · 60 min</span></button>
+      <button class="ptile" type="button" data-p="exam-study"><b>${ICON.book}Study an exam</b><span>80 questions · no timer · feedback after each answer</span></button>
+    </div>
+    <button class="pbtn" type="button" data-p="exam-back">Back to practice</button>
+  </section>`);
   window.scrollTo({ top: 0 });
 }
 function examSaveHelp() {
@@ -372,11 +383,12 @@ function startPractice(opt) {
   P = { mode: "practice", label, items, i: 0, again: opt, flags: new Set() };
   renderPQ(); window.scrollTo({ top: 0 });
 }
-function startExam() {
+function startExam(mode = "timed") {
   if (P && P.timer) clearInterval(P.timer);
-  P = { mode: "exam", label: "Mock exam", items: shuffle(QS).slice(0, 80).map(makeItem), i: 0, flags: new Set(), end: Date.now() + 60 * 60 * 1000 };
-  P.timer = setInterval(pTick, 1000);
-  saveExam(); renderPQ(); window.scrollTo({ top: 0 });
+  const timed = mode === "timed";
+  P = { mode: timed ? "exam" : "study-exam", label: timed ? "Mock exam" : "Study an exam", items: shuffle(QS).slice(0, 80).map(makeItem), i: 0, again: { examMode: mode }, flags: new Set(), ...(timed ? { end: Date.now() + 60 * 60 * 1000 } : {}) };
+  if (timed) { P.timer = setInterval(pTick, 1000); saveExam(); }
+  renderPQ(); window.scrollTo({ top: 0 });
 }
 function pTick() {
   if (!P || P.mode !== "exam" || P.done) return;
@@ -397,7 +409,7 @@ function renderPQ() {
   const saveHelpOpen = !!$("pmain").querySelector(".save-help-disclosure[open]");
   const answered = P.items.filter(x => x.picked.length === x.q.a.length).length;
   let h = `<div class="pcard">
-    <div class="qhead"><span class="mode">${ex ? "Mock exam" : "Practice · " + esc(P.label)}</span><span class="hint">Question ${P.i + 1} of ${P.items.length}</span><span class="sp"></span>${ex ? `<span class="qtimer" id="qtimer" aria-live="off">60:00</span>` : ""}<button class="pbtn" type="button" data-pact="quit">Quit</button></div>
+    <div class="qhead"><span class="mode">${ex ? "Mock exam" : P.mode === "study-exam" ? esc(P.label) : "Practice · " + esc(P.label)}</span><span class="hint">Question ${P.i + 1} of ${P.items.length}</span><span class="sp"></span>${ex ? `<span class="qtimer" id="qtimer" aria-live="off">60:00</span>` : ""}<button class="pbtn" type="button" data-pact="quit">Quit</button></div>
     ${ex ? `<details class="save-help-disclosure"${saveHelpOpen ? " open" : ""}><summary>How to have my progress saved</summary>${examSaveHelp()}</details>` : ""}
     <div class="qbar"><i style="width:${(ex ? answered : P.i + (it.checked ? 1 : 0)) / P.items.length * 100}%"></i></div>
     <div class="qmeta"><span>${esc(QB.topics[q.t])}</span>${multi ? `<span class="choose">Choose ${q.a.length}</span>` : ""}</div>
@@ -413,7 +425,7 @@ function renderPQ() {
     h += `<div class="pfb ${ok ? "ok" : "no"}"><strong>${ok ? "Correct" : "Not quite"}</strong><p>${esc(q.x)}</p>${pquoteHtml(q)}</div>`;
   }
   if (P.confirm === "leave") h += `<div class="confirm"><span>Your mock exam is still running. Leave it? It won't be scored.</span><div class="row"><button class="pbtn" type="button" data-pact="leaveyes">Leave the exam</button><button class="pbtn" type="button" data-pact="cancel">Keep going</button></div></div>`;
-  if (P.confirm === "quit") h += `<div class="confirm"><span>${ex ? "Quit the mock exam? It won't be scored." : "Quit this round? Answers you already checked are saved."}</span><div class="row"><button class="pbtn" type="button" data-pact="quityes">Quit</button><button class="pbtn" type="button" data-pact="cancel">Keep going</button></div></div>`;
+  if (P.confirm === "quit") h += `<div class="confirm"><span>${ex ? "Quit the mock exam? It won't be scored." : P.mode === "study-exam" ? "Quit this study exam? Answers you already checked are saved." : "Quit this round? Answers you already checked are saved."}</span><div class="row"><button class="pbtn" type="button" data-pact="quityes">Quit</button><button class="pbtn" type="button" data-pact="cancel">Keep going</button></div></div>`;
   if (P.confirm === "submit") { const open = P.items.length - answered; h += `<div class="confirm"><span>${open ? `${open} question${open > 1 ? "s are" : " is"} unanswered and ${P.flags.size} flagged. Submit anyway?` : `All questions answered${P.flags.size ? `, ${P.flags.size} still flagged` : ""}. Submit your exam?`}</span><div class="row"><button class="pbtn" type="button" data-pact="submityes">Submit</button><button class="pbtn" type="button" data-pact="cancel">Not yet</button></div></div>`; }
   const actLbl = ex ? (P.i === P.items.length - 1 ? "Review and submit" : "Next") : it.checked ? (P.i === P.items.length - 1 ? "See results" : "Next question") : "Check answer";
   const actDis = !ex && !it.checked && it.picked.length !== q.a.length;
@@ -427,7 +439,7 @@ function renderPQ() {
 }
 function pPick(oi) {
   const it = P.items[P.i], q = it.q;
-  if (it.checked && P.mode === "practice") return;
+  if (it.checked && P.mode !== "exam") return;
   if (q.a.length === 1) it.picked = [oi];
   else if (it.picked.includes(oi)) it.picked = it.picked.filter(x => x !== oi);
   else if (it.picked.length < q.a.length) it.picked = it.picked.concat(oi);
@@ -458,7 +470,7 @@ function showPResults(exam) {
   const by = {}; P.items.forEach(it => { const t = it.q.t; by[t] = by[t] || [0, 0]; by[t][1]++; if (sameSet(it.picked, it.q.a)) by[t][0]++; });
   const wrong = P.items.filter(it => !sameSet(it.picked, it.q.a)); P.wrongIds = wrong.map(it => it.q.id);
   $("pmain").innerHTML = `<div class="pcard">
-    <span class="hint" style="text-transform:uppercase;letter-spacing:.1em;font-weight:700">${exam ? `Mock exam result · ${P.used} min used` : "Practice result · " + esc(P.label)}</span>
+    <span class="hint" style="text-transform:uppercase;letter-spacing:.1em;font-weight:700">${exam ? `Mock exam result · ${P.used} min used` : P.mode === "study-exam" ? "Study an exam result" : "Practice result · " + esc(P.label)}</span>
     <div class="row" style="gap:18px"><span class="bigpct">${pct}%</span><span class="pverdict ${pass ? "pass" : "fail"}">${exam ? (pass ? "Pass" : "Below pass mark") : (pass ? "Exam level" : "Keep practising")}</span></div>
     <span>${ok} of ${n} correct · PSM I pass mark is 85%</span>
     <div class="ptopics">${Object.entries(by).map(([t, [a, m]]) => { const p = Math.round(a / m * 100); return `<div class="ptopic"><div><div class="nm">${esc(QB.topics[t])}</div><div class="sb">${a} of ${m} correct</div></div><div class="meterbar"><i style="width:${p}%"></i></div><span class="pct">${p}%</span></div>`; }).join("")}</div>

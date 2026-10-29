@@ -65,7 +65,7 @@ const OUT = shotsDir + "/app-";
   const saveHelpText = await page.locator("#pmain .save-help").innerText();
   if (!saveHelpText.includes("localStorage") || !saveHelpText.includes("normal browser tab")) throw new Error("mock exam save help missing from practice page");
   // exam
-  await page.click('#pmain [data-p="exam"]'); await page.waitForTimeout(300);
+  await page.click('#pmain [data-p="exam"]'); await page.click('#pmain [data-p="exam-timed"]'); await page.waitForTimeout(300);
   await page.locator("#pmain .save-help-disclosure summary").click();
   if (!await page.locator("#pmain .save-help-disclosure .save-copy").isVisible()) throw new Error("mock exam save help unavailable while exam is running");
   await page.screenshot({ path: OUT + tag + "-exam.png", fullPage: mode === "phone" }); await ov("exam");
