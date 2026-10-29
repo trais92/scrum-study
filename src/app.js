@@ -140,12 +140,16 @@ function sectionIdsFor(r) {
   }
   return ids;
 }
+function guideSourceSectionId(source) {
+  const match = String(source || "").match(/^Scrum Guide \(US 2020\):\s*(.+?)(?:\s+\(Seite\s+[\d-]+\))?$/i);
+  return match ? sectionIdsFor(match[1])[0] || "" : "";
+}
 const SEC_Q = {};
 for (const q of QS) for (const id of sectionIdsFor(q.r)) (SEC_Q[id] = SEC_Q[id] || []).push(q.id);
 const QBYID = Object.fromEntries([...QS, ...ALL_EXAM_QUESTIONS].map(q => [q.id, q]));
 
 // ---------- Routing ----------
-let view = "home", guideReturn = null, gscroll = 0;
+let view = "home", gscroll = 0;
 function parseHash() {
   const h = decodeURIComponent(location.hash.slice(1));
   const [path, query] = h.split("?");
@@ -157,7 +161,7 @@ function go(hash, after) { afterRoute = after || null; if (location.hash === "#"
 function route() {
   const r = parseHash();
   const prev = view; view = r.v;
-  if (prev === "guide" && view !== "guide") { gscroll = window.scrollY; guideReturn = null; }
+  if (prev === "guide" && view !== "guide") gscroll = window.scrollY;
   for (const v of ["home", "guide", "practice", "game"]) $("v-" + v).hidden = v !== view;
   document.querySelectorAll(".nav a").forEach(a => a.toggleAttribute("aria-current", a.dataset.nav === view) || (a.dataset.nav === view && a.setAttribute("aria-current", "page")));
   document.querySelectorAll(".nav a").forEach(a => a.dataset.nav === view ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
@@ -254,13 +258,6 @@ let gmarks = [], gcur = -1, gtimer = null, glang = null, gquery = "";
 function openGuideView(sub, q, fresh) {
   if (glang !== gprefs.lang) renderGuideBody(gprefs.lang);
   if (q && q !== gquery) { $("gq").value = q; runSearch(q, false); }
-  $("guideBackBtn") && $("guideBackBtn").remove();
-  if (guideReturn) {
-    const b = document.createElement("button"); b.className = "primary backtop"; b.id = "guideBackBtn"; b.type = "button";
-    b.textContent = "← Back to your question";
-    b.onclick = () => { const r = guideReturn; guideReturn = null; b.remove(); go(r, () => { if (P && P.done && P.resultsHtml) { $("pmain").innerHTML = P.resultsHtml; } else renderPractice(); }); };
-    $("v-guide").appendChild(b);
-  }
   if (sub) {
     requestAnimationFrame(() => guideJump(sub, true, true));
     // Web fonts can change the layout after the first jump: jump again once they have loaded.
@@ -313,7 +310,7 @@ document.querySelectorAll(".lang button").forEach(b => b.onclick = () => {
 $("tocBtn").onclick = () => { const o = !$("toc").classList.contains("open"); $("toc").classList.toggle("open", o); $("tocBtn").setAttribute("aria-expanded", String(o)); };
 $("toc").addEventListener("click", e => { const a = e.target.closest("[data-jump]"); if (!a) return; e.preventDefault(); history.replaceState(null, "", "#guide/" + a.dataset.jump); guideJump(a.dataset.jump, true, false); });
 $("sgBody").addEventListener("click", e => {
-  const b = e.target.closest("[data-secq]"); if (b) { const h = document.getElementById(b.dataset.secq); guideReturn = null; go("practice", () => startPractice({ ids: SEC_Q[b.dataset.secq], label: h ? h.textContent : "This section" })); return; }
+  const b = e.target.closest("[data-secq]"); if (b) { const h = document.getElementById(b.dataset.secq); go("practice", () => startPractice({ ids: SEC_Q[b.dataset.secq], label: h ? h.textContent : "This section" })); return; }
   const t = e.target.closest(".term");
   if (!t) { hideTip(); return; }
   // Focus (on tap) or hover already opened this tip: a click right after must not close it again.
@@ -467,7 +464,6 @@ document.addEventListener("click", e => {
     else startPractice(again);
   }
   if (k === "redo") startPractice({ ids: P.wrongIds, label: "Your mistakes from this round" });
-  if (k === "readguide") { if (P && P.done) P.resultsHtml = $("pmain").innerHTML; guideReturn = "practice"; go("guide/" + b.dataset.sec); }
 });
 // A running mock exam is never thrown away without asking, and survives a reload.
 function guardExam(f) {
@@ -537,10 +533,10 @@ function chatHtml(s) {
   return `<div class="qchat"><span class="lbl">Team chat</span>${linesHtml(s.filter(l => LOOK[l[0]]), false)}</div>`;
 }
 function pquoteHtml(q) {
-  const external = q.sourceLabel || q.examSource;
-  const sec = external ? null : sectionIdsFor(q.r)[0];
+  const sec = q.sourceLabel ? "" : q.examSource ? guideSourceSectionId(q.r) : sectionIdsFor(q.r)[0] || "";
   const ref = q.sourceLabel ? esc(q.sourceLabel) : q.examSource ? esc(q.r) : `Scrum Guide 2020 · ${esc(q.r)}`;
-  return `<div class="pquote"><span class="ref">${ref}</span>${(q.g || []).map(g => `<q>${esc(g)}</q>`).join("")}${sec ? `<button type="button" class="linkbtn" data-pact="readguide" data-sec="${sec}">Read this section in the Guide</button>` : ""}</div>`;
+  const refHtml = sec ? `<a class="ref" href="#guide/${sec}" target="_blank" rel="noopener">${ref}</a>` : `<span class="ref">${ref}</span>`;
+  return `<div class="pquote">${refHtml}${(q.g || []).map(g => `<q>${esc(g)}</q>`).join("")}</div>`;
 }
 let examTimerInterval = null;
 function clearExamTimer() {

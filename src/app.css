@@ -252,6 +252,9 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .pfb p { margin: 0; }
 .pquote { background: var(--paper); color: var(--tag-ink); border: 1px solid var(--paper-line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; font-size: 14px; }
 .pquote .ref { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--tag-muted); }
+.pquote a.ref { text-decoration: underline; text-decoration-color: var(--tag-edge); text-underline-offset: 2px; }
+.pquote a.ref:hover { color: var(--accent-ink); }
+.pquote a.ref:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 3px; border-radius: 2px; }
 .pquote q { display: block; padding-left: 10px; border-left: 3px solid var(--tag-edge); quotes: "“" "”"; }
 .linkbtn { justify-self: start; border: 0; background: transparent; padding: 0; font: inherit; font-size: 13px; font-weight: 700; color: var(--accent-ink); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .qnav { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
