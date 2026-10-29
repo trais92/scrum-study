@@ -556,6 +556,7 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .ptitle { font-family: var(--f-display); font-weight: 900; font-size: clamp(32px, 4.6vw, 48px); line-height: .92; margin: 0; text-transform: uppercase; }
 .pcard { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 18px 20px; display: grid; gap: 14px; }
 .pcard h2 { margin: 0; font-family: var(--f-display); font-weight: 900; font-size: 22px; text-transform: uppercase; letter-spacing: .02em; }
+.exam-confetti { position: fixed; inset: 0; z-index: 30; width: 100%; height: 100%; pointer-events: none; }
 .ptopics { display: grid; gap: 8px; }
 .ptopic { display: grid; grid-template-columns: minmax(0, 1fr) 140px auto; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
 .ptopic:last-child { border-bottom: 0; }
@@ -3655,9 +3656,87 @@ function finishExam() {
   P.done = true; saveExam();
   showPResults(true);
 }
+let examConfettiCleanup = null;
+function clearExamConfetti() {
+  if (examConfettiCleanup) examConfettiCleanup();
+  examConfettiCleanup = null;
+}
+function celebrateExamPass() {
+  if (P.celebrationStarted) return;
+  P.celebrationStarted = true;
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+  clearExamConfetti();
+  const canvas = document.createElement("canvas"), context = canvas.getContext("2d");
+  canvas.className = "exam-confetti";
+  canvas.setAttribute("aria-hidden", "true");
+  canvas.dataset.waves = "3";
+  document.body.appendChild(canvas);
+
+  const colors = ["#f04438", "#ff9f1c", "#f6d743", "#35b779", "#2589ff", "#8a5cf6", "#f052b5"];
+  const particles = [], waveTimers = [];
+  let animationFrame = 0, cleanupTimer = 0, width = 0, height = 0, scale = 1;
+  const resize = () => {
+    scale = Math.min(window.devicePixelRatio || 1, 2);
+    width = window.innerWidth; height = window.innerHeight;
+    canvas.width = Math.round(width * scale); canvas.height = Math.round(height * scale);
+    context.setTransform(scale, 0, 0, scale, 0, 0);
+  };
+  const addWave = count => {
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * width, y: -Math.random() * Math.min(height * .4, 260) - 12,
+        vx: (Math.random() - .5) * 6.5, vy: 1.4 + Math.random() * 4.6,
+        size: 5 + Math.random() * 8, rotation: Math.random() * Math.PI,
+        spin: (Math.random() - .5) * .22, color: colors[Math.floor(Math.random() * colors.length)],
+        shape: Math.floor(Math.random() * 3), age: 0, lifetime: 130 + Math.random() * 65
+      });
+    }
+  };
+  const draw = () => {
+    context.clearRect(0, 0, width, height);
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const piece = particles[i];
+      piece.age++; piece.x += piece.vx; piece.y += piece.vy; piece.vy += .045; piece.rotation += piece.spin;
+      if (piece.age >= piece.lifetime || piece.y > height + 24) { particles.splice(i, 1); continue; }
+      const fade = Math.min(1, (piece.lifetime - piece.age) / 28);
+      context.save();
+      context.globalAlpha = fade;
+      context.translate(piece.x, piece.y);
+      context.rotate(piece.rotation);
+      context.fillStyle = piece.color;
+      if (piece.shape === 0) {
+        context.fillRect(-piece.size / 2, -piece.size / 3, piece.size, piece.size * .66);
+      } else if (piece.shape === 1) {
+        context.beginPath(); context.arc(0, 0, piece.size / 2, 0, Math.PI * 2); context.fill();
+      } else {
+        context.beginPath(); context.moveTo(0, -piece.size / 2); context.lineTo(piece.size / 2, piece.size / 2);
+        context.lineTo(-piece.size / 2, piece.size / 2); context.closePath(); context.fill();
+      }
+      context.restore();
+    }
+    animationFrame = requestAnimationFrame(draw);
+  };
+  resize();
+  window.addEventListener("resize", resize);
+  addWave(115);
+  waveTimers.push(setTimeout(() => addWave(105), 380), setTimeout(() => addWave(95), 780));
+  animationFrame = requestAnimationFrame(draw);
+  const cleanup = () => {
+    cancelAnimationFrame(animationFrame);
+    waveTimers.forEach(clearTimeout);
+    clearTimeout(cleanupTimer);
+    window.removeEventListener("resize", resize);
+    canvas.remove();
+    if (examConfettiCleanup === cleanup) examConfettiCleanup = null;
+  };
+  cleanupTimer = setTimeout(cleanup, 3600);
+  examConfettiCleanup = cleanup;
+}
 function showPResults(exam) {
   P.done = true;
   const ok = P.items.filter(it => sameSet(it.picked, it.q.a)).length, n = P.items.length, pct = Math.round(ok / n * 100), pass = pct >= 85;
+  if (exam && pass) celebrateExamPass();
   const by = {}; P.items.forEach(it => { const t = it.q.t; by[t] = by[t] || [0, 0]; by[t][1]++; if (sameSet(it.picked, it.q.a)) by[t][0]++; });
   const wrong = P.items.filter(it => !sameSet(it.picked, it.q.a)); P.wrongIds = wrong.map(it => it.q.id);
   $("pmain").innerHTML = `<div class="pcard">
