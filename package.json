@@ -2,8 +2,8 @@
   "name": "scrum-study-tests",
   "private": true,
   "scripts": {
-    "build": "node src/run-build.js",
-    "test": "node src/tests/questions.js && npm run build && node src/tests/quotes.js && node src/tests/sim.js best && node src/tests/practice-modes.js && node src/tests/smoke.js desktop light && node src/tests/smoke.js phone light"
+    "build": "node src/run-build.js && node src/build-exam-pdfs.js",
+    "test": "node src/tests/questions.js && node src/tests/exams.js && node src/tests/imported-questions.js && npm run build && node src/tests/exam-pdfs.js && node src/tests/quotes.js && node src/tests/sim.js best && node src/tests/practice-modes.js && node src/tests/smoke.js desktop light && node src/tests/smoke.js phone light"
   },
   "devDependencies": {
     "playwright": "1.55.1"
