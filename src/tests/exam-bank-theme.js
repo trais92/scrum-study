@@ -48,7 +48,10 @@ function contrast(foreground, background) {
           })()
         };
       });
-      assert.ok(colors.background !== colors.panel, `${colorScheme} bank header should remain visually highlighted against cards`);
+      const background = rgb(colors.background);
+      const panel = rgb(colors.panel);
+      assert.ok(background.some((channel, index) => Math.abs(channel - panel[index]) >= 8),
+        `${colorScheme} bank header should remain visibly highlighted against cards`);
       assert.ok(contrast(colors.color, colors.background) >= 4.5,
         `${colorScheme} bank header text should meet 4.5:1 contrast: ${JSON.stringify(colors)}`);
       if (colorScheme === "dark") {
