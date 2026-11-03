@@ -85,7 +85,7 @@ const OUT = shotsDir + "/app-";
   }
   await page.locator("#homeExamTimer").check();
   await page.locator("#v-home .exam-group").nth(1).locator("summary").click();
-  if (!(await page.locator('#v-home [data-home="exam-psm-1"] .exam-copy small').textContent()).includes("2 hrs 15 min")) errs.push("TIMED EXAM duration does not scale to 45 seconds per question");
+  if (!(await page.locator('#v-home [data-home="exam-psm-1"] .exam-action-detail').textContent()).includes("2 hrs 15 min")) errs.push("TIMED EXAM duration does not scale to 45 seconds per question");
   await page.click('#v-home [data-home="exam-psm-1"]'); await page.waitForTimeout(300);
   let timedExam = await page.evaluate(() => ({ remaining: P.deadline - Date.now(), display: document.querySelector("#examTimer")?.textContent }));
   if (timedExam.remaining > 8100000 || timedExam.remaining < 8095000 || !/^02:1[45]:\d\d$/.test(timedExam.display || "")) errs.push(`180-question exam timer is not 2h 15m: ${JSON.stringify(timedExam)}`);
@@ -185,21 +185,21 @@ const OUT = shotsDir + "/app-";
     psave();
   });
   await page.locator("#pmain .exam-group").first().locator("summary").click();
-  let examStatusTile = page.locator('#pmain [data-p="exam-1"]');
+  let examStatusTile = page.locator('#pmain .exam-card-info').first();
   if (!(await examStatusTile.getAttribute("class")).includes("is-failed") || !(await examStatusTile.innerText()).includes("Failed")) errs.push("FAILED EXAM is not marked red");
   await page.evaluate(() => {
     pstore.exams.push({ date: "today", label: "Scrum Course 1 · Exam 1", examId: "exam-1", score: 90 });
     psave(); renderPractice();
   });
   await page.locator("#pmain .exam-group").first().locator("summary").click();
-  examStatusTile = page.locator('#pmain [data-p="exam-1"]');
+  examStatusTile = page.locator('#pmain .exam-card-info').first();
   if (!(await examStatusTile.getAttribute("class")).includes("is-passed") || !(await examStatusTile.innerText()).includes("Passed · 90%")) errs.push("PASSED EXAM is not marked green");
   await page.evaluate(() => {
     pstore.exams.push({ date: "today", label: "Scrum Course 1 · Exam 1", examId: "exam-1", score: 20 });
     psave(); renderPractice();
   });
   await page.locator("#pmain .exam-group").first().locator("summary").click();
-  examStatusTile = page.locator('#pmain [data-p="exam-1"]');
+  examStatusTile = page.locator('#pmain .exam-card-info').first();
   if (!(await examStatusTile.getAttribute("class")).includes("is-passed") || !(await examStatusTile.innerText()).includes("Passed · 90%")) errs.push("PASSED EXAM lost its green status after a later failure");
   await page.click('#pmain [data-p="exam-bank"]'); await page.waitForTimeout(300);
   if ((await page.locator('#pmain .qhead .mode').textContent()).trim() !== "Exam 7 · Question bank") errs.push("QUESTION BANK MOCK title is missing");

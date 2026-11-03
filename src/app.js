@@ -71,8 +71,11 @@ function examDurationLabel(questionCount) {
 function examTimerChoiceHtml(id) {
   return `<label class="exam-timing" for="${id}">
     <input id="${id}" type="checkbox" data-exam-timer ${pstore.timedExams ? "checked" : ""}>
-    <span><strong>Timed exams</strong><small>45 seconds per question · 60 minutes for 80 questions</small></span>
+    <span><strong>Time mock exams</strong><small>On: 45 seconds per question · off: no countdown. Study is always untimed.</small></span>
   </label>`;
+}
+function examMockTimingLabel(questionCount) {
+  return pstore.timedExams ? `Timed · ${examDurationLabel(questionCount)}` : "Untimed · no countdown";
 }
 function savedExamStatus(examId, label) {
   const legacyLabels = examId === "exam-bank" ? [label, "Question bank mock"] : [label];
@@ -85,13 +88,16 @@ function savedExamStatus(examId, label) {
 }
 function examTileHtml(exam, attr, index) {
   const status = savedExamStatus(exam.id, exam.label);
-  return `<div class="exam-card">
-    <button class="exam-tile${status ? ` is-${status.state}` : ""}" type="button" ${attr}="${exam.id}">
-      <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(exam.shortLabel)}</b><small data-exam-time="${exam.questions.length}">${exam.questions.length} questions · ${pstore.timedExams ? examDurationLabel(exam.questions.length) : "Untimed"}</small>${status ? `<small class="exam-result ${status.state}">${esc(status.text)}</small>` : ""}</span><span class="exam-arrow" aria-hidden="true">→</span>
-    </button>
-    <button class="exam-study" type="button" ${attr}="study-${exam.id}">Study · immediate feedback</button>
+  return `<article class="exam-card">
+    <div class="exam-card-info${status ? ` is-${status.state}` : ""}">
+      <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(exam.shortLabel)}</b><small>${exam.questions.length} questions</small>${status ? `<small class="exam-result ${status.state}">${esc(status.text)}</small>` : ""}</span>
+    </div>
+    <div class="exam-actions">
+      <button class="exam-action exam-action-mock" type="button" ${attr}="${exam.id}" data-exam-label="${esc(exam.label)}" aria-label="Start mock exam: ${esc(exam.label)} (${examMockTimingLabel(exam.questions.length)})"><span class="exam-action-title">Start mock exam</span><span class="exam-action-detail" data-exam-time="${exam.questions.length}">${examMockTimingLabel(exam.questions.length)}</span></button>
+      <button class="exam-action exam-action-study" type="button" ${attr}="study-${exam.id}" aria-label="Study ${esc(exam.label)} untimed with immediate feedback after each answer"><span class="exam-action-title">Study untimed</span><span class="exam-action-detail">Feedback after each answer</span></button>
+    </div>
     <div class="exam-downloads"><a href="${exam.pdfUrl}" download="${exam.pdfUrl.split("/").pop()}" aria-label="Download ${esc(exam.label)} question PDF">Exam PDF</a><a href="${exam.answerKeyUrl}" download="${exam.answerKeyUrl.split("/").pop()}" aria-label="Download ${esc(exam.label)} answer key PDF">Answer key</a></div>
-  </div>`;
+  </article>`;
 }
 function examGroupsHtml(attr) {
   return EXAM_GROUPS.map(group => {
@@ -104,13 +110,16 @@ function examGroupsHtml(attr) {
 }
 function examBankTileHtml(attr) {
   const status = savedExamStatus("exam-bank", "Exam 7 · Question bank");
-  return `<div class="exam-card exam-bank-card">
-    <button class="exam-tile exam-bank${status ? ` is-${status.state}` : ""}" type="button" ${attr}="exam-bank">
-      <span class="exam-number">↻</span><span class="exam-copy"><b>Question bank mock</b><small data-exam-time="80">Random 80 questions · ${pstore.timedExams ? examDurationLabel(80) : "Untimed"}</small>${status ? `<small class="exam-result ${status.state}">${esc(status.text)}</small>` : ""}</span><span class="exam-arrow" aria-hidden="true">→</span>
-    </button>
-    <button class="exam-study" type="button" ${attr}="study-exam-bank">Study · immediate feedback</button>
+  return `<article class="exam-card exam-bank-card">
+    <div class="exam-card-info exam-bank${status ? ` is-${status.state}` : ""}">
+      <span class="exam-number">↻</span><span class="exam-copy"><b>Question bank mock</b><small>Random 80 questions</small>${status ? `<small class="exam-result ${status.state}">${esc(status.text)}</small>` : ""}</span>
+    </div>
+    <div class="exam-actions">
+      <button class="exam-action exam-action-mock" type="button" ${attr}="exam-bank" data-exam-label="Question bank mock" aria-label="Start mock exam: Question bank mock (${examMockTimingLabel(80)})"><span class="exam-action-title">Start mock exam</span><span class="exam-action-detail" data-exam-time="80">${examMockTimingLabel(80)}</span></button>
+      <button class="exam-action exam-action-study" type="button" ${attr}="study-exam-bank" aria-label="Study the question bank mock untimed with immediate feedback after each answer"><span class="exam-action-title">Study untimed</span><span class="exam-action-detail">Feedback after each answer</span></button>
+    </div>
     <p class="exam-note">The mock is randomized each time, so printable PDFs are available for the 18 fixed course exams.</p>
-  </div>`;
+  </article>`;
 }
 const ICON = {
   book: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 3h4.5a2 2 0 0 1 2 2v8.5a1.5 1.5 0 0 0-1.5-1.5H2zM14 3H9.5a2 2 0 0 0-1 .3"/><path d="M14 3v9H9a1.5 1.5 0 0 0-1.5 1.5"/></svg>',
@@ -200,8 +209,8 @@ function renderHome() {
       </section>
       </div>
       <section class="entry exam-entry" aria-labelledby="h-prac">
-        <div class="exam-heading"><div><span class="exam-kicker">Optional timer</span><h2 id="h-prac">Choose an exam</h2></div><span class="exam-count">18 exams</span></div>
-        <p>Choose a course and decide whether you want to take the exam with a countdown.</p>
+        <div class="exam-heading"><div><span class="exam-kicker">Mock or study</span><h2 id="h-prac">Choose an exam</h2></div><span class="exam-count">18 exams</span></div>
+        <p>Choose a mock exam with your optional timer, or study untimed with feedback after each answer.</p>
         ${examTimerChoiceHtml("homeExamTimer")}
         <div class="exam-groups">${examGroupsHtml("data-home")}</div>
         <div class="exam-random"><span class="exam-kicker">Mix it up</span>${examBankTileHtml("data-home")}</div>
@@ -238,8 +247,10 @@ function updateExamTimerChoices() {
   document.querySelectorAll("[data-exam-timer]").forEach(input => { input.checked = pstore.timedExams; });
   document.querySelectorAll("[data-exam-time]").forEach(label => {
     const count = Number(label.dataset.examTime);
-    const random = label.closest(".exam-bank");
-    label.textContent = `${random ? "Random " : ""}${count} questions · ${pstore.timedExams ? examDurationLabel(count) : "Untimed"}`;
+    const timing = examMockTimingLabel(count);
+    label.textContent = timing;
+    const action = label.closest("button");
+    if (action) action.setAttribute("aria-label", `Start mock exam: ${action.dataset.examLabel} (${timing})`);
   });
 }
 document.addEventListener("change", e => {
@@ -422,8 +433,8 @@ function renderPractice() {
       <button class="ptile" type="button" data-p="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round</span></button>
     </div>
     <section class="pcard exam-entry" aria-labelledby="examPracticeHeading">
-      <div class="exam-heading"><div><span class="exam-kicker">Optional timer</span><h2 id="examPracticeHeading">Course exams</h2></div><span class="exam-count">18 exams</span></div>
-      <p>Pick an exam from one of your three course collections. Your answers are saved as you go.</p>
+      <div class="exam-heading"><div><span class="exam-kicker">Mock or study</span><h2 id="examPracticeHeading">Course exams</h2></div><span class="exam-count">18 exams</span></div>
+      <p>Choose a mock exam with your optional timer, or study untimed with feedback after each answer. Your answers are saved as you go.</p>
       ${examTimerChoiceHtml("practiceExamTimer")}
       <div class="exam-groups">${examGroupsHtml("data-p")}</div>
       <div class="exam-random"><span class="exam-kicker">Mix it up</span>${examBankTileHtml("data-p")}</div>

@@ -407,7 +407,7 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .quick-chip:hover:not(:disabled) { border-color: var(--accent); }
 .quick-chip:disabled { opacity: .55; cursor: not-allowed; }
 .quick-chip svg { width: 16px; height: 16px; color: var(--accent-ink); flex: none; }
-.exam-entry { background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 13%, var(--panel)) 0%, var(--panel) 72%); border-color: color-mix(in srgb, var(--accent) 32%, var(--line)); }
+.exam-entry { background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 13%, var(--panel)) 0%, var(--panel) 72%); border-color: color-mix(in srgb, var(--accent) 32%, var(--line)); padding: 24px; gap: 16px; }
 .exam-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .exam-heading > div { display: grid; gap: 6px; }
 .exam-count { flex: none; padding: 6px 10px; border-radius: 99px; background: var(--ink); color: var(--panel); font: 700 12px var(--f-mono); white-space: nowrap; }
@@ -417,24 +417,29 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .exam-timing span { display: grid; gap: 2px; }
 .exam-timing strong { font-size: 13px; }
 .exam-timing small { color: var(--muted); font-size: 11px; line-height: 1.3; }
-.exam-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.exam-groups { display: grid; gap: 9px; }
-.exam-group { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--panel) 82%, var(--accent-soft)); }
+.exam-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.exam-groups { display: grid; gap: 10px; }
+.exam-group { overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--panel) 82%, var(--accent-soft)); }
 .exam-group[open] { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
-.exam-group summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 13px; color: var(--ink); font-weight: 800; cursor: pointer; list-style: none; }
+.exam-group summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 15px; color: var(--ink); font-weight: 800; cursor: pointer; list-style: none; }
 .exam-group summary::-webkit-details-marker { display: none; }
 .exam-group summary::after { content: "+"; color: var(--accent-ink); font: 700 18px var(--f-mono); }
 .exam-group[open] summary::after { content: "−"; }
 .exam-group summary small { margin-left: auto; color: var(--muted); font-size: 11px; font-weight: 600; text-align: right; }
-.exam-group .exam-grid { padding: 0 9px 9px; }
+.exam-group .exam-grid { padding: 0 10px 10px; }
 .exam-random { display: grid; gap: 7px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
 .exam-note { margin: 0; color: var(--muted); font-size: 12px; }
-.exam-card { display: grid; gap: 4px; min-width: 0; }
-.exam-study { justify-self: start; padding: 3px 1px; border: 0; background: transparent; color: var(--accent-ink); font: inherit; font-size: 10.5px; font-weight: 800; text-align: left; cursor: pointer; }
-.exam-study:hover { text-decoration: underline; }
-.exam-tile { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-width: 0; min-height: 62px; padding: 11px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); text-align: left; font: inherit; cursor: pointer; transition: border-color .15s, transform .15s, box-shadow .15s; }
-.exam-tile:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow); }
-.exam-card .exam-tile { width: 100%; }
+.exam-card { display: grid; gap: 9px; min-width: 0; padding: 10px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); }
+.exam-card-info { display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: center; gap: 9px; min-width: 0; }
+.exam-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.exam-action { display: grid; align-content: center; justify-items: start; gap: 3px; min-width: 0; min-height: 60px; padding: 8px 9px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); text-align: left; font: inherit; cursor: pointer; transition: border-color .15s, background .15s, transform .15s; }
+.exam-action:hover { border-color: var(--accent); transform: translateY(-1px); }
+.exam-action:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.exam-action-mock { border-color: var(--ink); background: var(--ink); color: var(--panel); }
+.exam-action-mock:hover { background: color-mix(in srgb, var(--ink) 88%, var(--accent)); }
+.exam-action-study { background: var(--accent-soft); }
+.exam-action-title { font-size: 12px; font-weight: 850; line-height: 1.2; }
+.exam-action-detail { font-size: 10px; line-height: 1.25; opacity: .82; }
 .exam-downloads { display: flex; gap: 5px; }
 .exam-downloads a { flex: 1; min-width: 0; padding: 4px 6px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); color: var(--accent-ink); font-size: 10.5px; font-weight: 700; text-align: center; text-decoration: none; }
 .exam-downloads a:hover { border-color: var(--accent); background: var(--accent-soft); }
@@ -447,10 +452,10 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .exam-bank { border-color: var(--ink); background: var(--ink); color: var(--panel); }
 .exam-bank .exam-number { background: var(--accent); }
 .exam-bank .exam-copy small { color: inherit; opacity: .74; }
-.exam-tile.is-passed { border-color: var(--good); background: var(--good-soft); color: var(--ink); }
-.exam-tile.is-failed { border-color: var(--bad); background: var(--bad-soft); color: var(--ink); }
-.exam-tile.is-passed .exam-number { background: var(--good); color: var(--panel); }
-.exam-tile.is-failed .exam-number { background: var(--bad); color: var(--panel); }
+.exam-card-info.is-passed { color: var(--good); }
+.exam-card-info.is-failed { color: var(--bad); }
+.exam-card-info.is-passed .exam-number { background: var(--good); color: var(--panel); }
+.exam-card-info.is-failed .exam-number { background: var(--bad); color: var(--panel); }
 .exam-result { font-size: 10.5px !important; font-weight: 800; }
 .exam-result.passed { color: var(--good); }
 .exam-result.failed { color: var(--bad); }
@@ -740,10 +745,14 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
   .entry { padding: 16px; }
   .entry h2 { font-size: 26px; }
   .game-entry { grid-template-columns: minmax(0, 1fr); gap: 14px; }
-  .exam-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .exam-grid, .exam-actions { grid-template-columns: minmax(0, 1fr); }
+  .exam-entry { padding: 18px; }
+  .exam-action { min-height: 54px; padding: 10px 12px; }
+  .exam-action-title { font-size: 13px; }
+  .exam-action-detail { font-size: 11px; }
   .qtext { font-size: 18px; }
 }
-@media (max-width: 380px) { .exam-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 380px) { .exam-entry { padding: 14px; } .exam-group summary { padding-inline: 11px; } }
 @media (max-width: 380px) { .nav a span { display: none; } .nav a { padding: 8px 12px; } }
 .watchbar { position: sticky; top: 0; z-index: 4; }
 .scene.watching .scene-body button { pointer-events: none; }
@@ -3094,8 +3103,11 @@ function examDurationLabel(questionCount) {
 function examTimerChoiceHtml(id) {
   return `<label class="exam-timing" for="${id}">
     <input id="${id}" type="checkbox" data-exam-timer ${pstore.timedExams ? "checked" : ""}>
-    <span><strong>Timed exams</strong><small>45 seconds per question · 60 minutes for 80 questions</small></span>
+    <span><strong>Time mock exams</strong><small>On: 45 seconds per question · off: no countdown. Study is always untimed.</small></span>
   </label>`;
+}
+function examMockTimingLabel(questionCount) {
+  return pstore.timedExams ? `Timed · ${examDurationLabel(questionCount)}` : "Untimed · no countdown";
 }
 function savedExamStatus(examId, label) {
   const legacyLabels = examId === "exam-bank" ? [label, "Question bank mock"] : [label];
@@ -3108,13 +3120,16 @@ function savedExamStatus(examId, label) {
 }
 function examTileHtml(exam, attr, index) {
   const status = savedExamStatus(exam.id, exam.label);
-  return `<div class="exam-card">
-    <button class="exam-tile${status ? ` is-${status.state}` : ""}" type="button" ${attr}="${exam.id}">
-      <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(exam.shortLabel)}</b><small data-exam-time="${exam.questions.length}">${exam.questions.length} questions · ${pstore.timedExams ? examDurationLabel(exam.questions.length) : "Untimed"}</small>${status ? `<small class="exam-result ${status.state}">${esc(status.text)}</small>` : ""}</span><span class="exam-arrow" aria-hidden="true">→</span>
-    </button>
-    <button class="exam-study" type="button" ${attr}="study-${exam.id}">Study · immediate feedback</button>
+  return `<article class="exam-card">
+    <div class="exam-card-info${status ? ` is-${status.state}` : ""}">
+      <span class="exam-number">${String(index + 1).padStart(2, "0")}</span><span class="exam-copy"><b>${esc(exam.shortLabel)}</b><small>${exam.questions.length} questions</small>${status ? `<small class="exam-result ${status.state}">${esc(status.text)}</small>` : ""}</span>
+    </div>
+    <div class="exam-actions">
+      <button class="exam-action exam-action-mock" type="button" ${attr}="${exam.id}" data-exam-label="${esc(exam.label)}" aria-label="Start mock exam: ${esc(exam.label)} (${examMockTimingLabel(exam.questions.length)})"><span class="exam-action-title">Start mock exam</span><span class="exam-action-detail" data-exam-time="${exam.questions.length}">${examMockTimingLabel(exam.questions.length)}</span></button>
+      <button class="exam-action exam-action-study" type="button" ${attr}="study-${exam.id}" aria-label="Study ${esc(exam.label)} untimed with immediate feedback after each answer"><span class="exam-action-title">Study untimed</span><span class="exam-action-detail">Feedback after each answer</span></button>
+    </div>
     <div class="exam-downloads"><a href="${exam.pdfUrl}" download="${exam.pdfUrl.split("/").pop()}" aria-label="Download ${esc(exam.label)} question PDF">Exam PDF</a><a href="${exam.answerKeyUrl}" download="${exam.answerKeyUrl.split("/").pop()}" aria-label="Download ${esc(exam.label)} answer key PDF">Answer key</a></div>
-  </div>`;
+  </article>`;
 }
 function examGroupsHtml(attr) {
   return EXAM_GROUPS.map(group => {
@@ -3127,13 +3142,16 @@ function examGroupsHtml(attr) {
 }
 function examBankTileHtml(attr) {
   const status = savedExamStatus("exam-bank", "Exam 7 · Question bank");
-  return `<div class="exam-card exam-bank-card">
-    <button class="exam-tile exam-bank${status ? ` is-${status.state}` : ""}" type="button" ${attr}="exam-bank">
-      <span class="exam-number">↻</span><span class="exam-copy"><b>Question bank mock</b><small data-exam-time="80">Random 80 questions · ${pstore.timedExams ? examDurationLabel(80) : "Untimed"}</small>${status ? `<small class="exam-result ${status.state}">${esc(status.text)}</small>` : ""}</span><span class="exam-arrow" aria-hidden="true">→</span>
-    </button>
-    <button class="exam-study" type="button" ${attr}="study-exam-bank">Study · immediate feedback</button>
+  return `<article class="exam-card exam-bank-card">
+    <div class="exam-card-info exam-bank${status ? ` is-${status.state}` : ""}">
+      <span class="exam-number">↻</span><span class="exam-copy"><b>Question bank mock</b><small>Random 80 questions</small>${status ? `<small class="exam-result ${status.state}">${esc(status.text)}</small>` : ""}</span>
+    </div>
+    <div class="exam-actions">
+      <button class="exam-action exam-action-mock" type="button" ${attr}="exam-bank" data-exam-label="Question bank mock" aria-label="Start mock exam: Question bank mock (${examMockTimingLabel(80)})"><span class="exam-action-title">Start mock exam</span><span class="exam-action-detail" data-exam-time="80">${examMockTimingLabel(80)}</span></button>
+      <button class="exam-action exam-action-study" type="button" ${attr}="study-exam-bank" aria-label="Study the question bank mock untimed with immediate feedback after each answer"><span class="exam-action-title">Study untimed</span><span class="exam-action-detail">Feedback after each answer</span></button>
+    </div>
     <p class="exam-note">The mock is randomized each time, so printable PDFs are available for the 18 fixed course exams.</p>
-  </div>`;
+  </article>`;
 }
 const ICON = {
   book: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 3h4.5a2 2 0 0 1 2 2v8.5a1.5 1.5 0 0 0-1.5-1.5H2zM14 3H9.5a2 2 0 0 0-1 .3"/><path d="M14 3v9H9a1.5 1.5 0 0 0-1.5 1.5"/></svg>',
@@ -3223,8 +3241,8 @@ function renderHome() {
       </section>
       </div>
       <section class="entry exam-entry" aria-labelledby="h-prac">
-        <div class="exam-heading"><div><span class="exam-kicker">Optional timer</span><h2 id="h-prac">Choose an exam</h2></div><span class="exam-count">18 exams</span></div>
-        <p>Choose a course and decide whether you want to take the exam with a countdown.</p>
+        <div class="exam-heading"><div><span class="exam-kicker">Mock or study</span><h2 id="h-prac">Choose an exam</h2></div><span class="exam-count">18 exams</span></div>
+        <p>Choose a mock exam with your optional timer, or study untimed with feedback after each answer.</p>
         ${examTimerChoiceHtml("homeExamTimer")}
         <div class="exam-groups">${examGroupsHtml("data-home")}</div>
         <div class="exam-random"><span class="exam-kicker">Mix it up</span>${examBankTileHtml("data-home")}</div>
@@ -3261,8 +3279,10 @@ function updateExamTimerChoices() {
   document.querySelectorAll("[data-exam-timer]").forEach(input => { input.checked = pstore.timedExams; });
   document.querySelectorAll("[data-exam-time]").forEach(label => {
     const count = Number(label.dataset.examTime);
-    const random = label.closest(".exam-bank");
-    label.textContent = `${random ? "Random " : ""}${count} questions · ${pstore.timedExams ? examDurationLabel(count) : "Untimed"}`;
+    const timing = examMockTimingLabel(count);
+    label.textContent = timing;
+    const action = label.closest("button");
+    if (action) action.setAttribute("aria-label", `Start mock exam: ${action.dataset.examLabel} (${timing})`);
   });
 }
 document.addEventListener("change", e => {
@@ -3445,8 +3465,8 @@ function renderPractice() {
       <button class="ptile" type="button" data-p="blitz"><b>${ICON.who}Who decides?</b><span>Rapid round</span></button>
     </div>
     <section class="pcard exam-entry" aria-labelledby="examPracticeHeading">
-      <div class="exam-heading"><div><span class="exam-kicker">Optional timer</span><h2 id="examPracticeHeading">Course exams</h2></div><span class="exam-count">18 exams</span></div>
-      <p>Pick an exam from one of your three course collections. Your answers are saved as you go.</p>
+      <div class="exam-heading"><div><span class="exam-kicker">Mock or study</span><h2 id="examPracticeHeading">Course exams</h2></div><span class="exam-count">18 exams</span></div>
+      <p>Choose a mock exam with your optional timer, or study untimed with feedback after each answer. Your answers are saved as you go.</p>
       ${examTimerChoiceHtml("practiceExamTimer")}
       <div class="exam-groups">${examGroupsHtml("data-p")}</div>
       <div class="exam-random"><span class="exam-kicker">Mix it up</span>${examBankTileHtml("data-p")}</div>
