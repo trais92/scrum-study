@@ -55,7 +55,7 @@
     "correct": [
       "b"
     ],
-    "explanation": "",
+    "explanation": "The Guide calls Scrum lightweight and purposefully incomplete: it defines only the parts needed to implement Scrum theory, not detailed instructions.",
     "section": "Scrum Guide (US 2020): Scrum Definition (Seite 3)",
     "correction": null
   },
@@ -122,7 +122,7 @@
       "b",
       "c"
     ],
-    "explanation": "",
+    "explanation": "The Scrum Guide describes all three: the Product Owner orders work into a Product Backlog; the Scrum Team creates an Increment during a Sprint; and the team and stakeholders inspect results and adapt.",
     "section": "Scrum Guide (US 2020): Scrum Definition (Seite 3)",
     "correction": null
   },
@@ -177,7 +177,7 @@
     "correct": [
       "a"
     ],
-    "explanation": "",
+    "explanation": "The Guide defines empiricism as knowledge from experience and decisions based on what is observed.",
     "section": "Scrum Guide (US 2020): Scrum Theory (Seite 3-4)",
     "correction": null
   },
@@ -202,7 +202,7 @@
     "correct": [
       "a"
     ],
-    "explanation": "",
+    "explanation": "Lean thinking reduces waste and focuses on the essentials.",
     "section": "Scrum Guide (US 2020): Scrum Theory (Seite 3-4)",
     "correction": null
   },
@@ -639,7 +639,7 @@
     "correct": [
       "c"
     ],
-    "explanation": "",
+    "explanation": "Developers inspect progress toward the Sprint Goal and adapt their plan in the Daily Scrum.",
     "section": "Scrum Guide (US 2020): Scrum Team (Seite 5-6)",
     "correction": null
   },
@@ -1729,7 +1729,7 @@
     "correct": [
       "c"
     ],
-    "explanation": "",
+    "explanation": "The Product Owner is accountable for maximizing product value and developing and communicating the Product Goal. The Guide does not define product vision as a separate accountability.",
     "section": "Scrum Guide (US 2020): Scrum Team (Seite 5-6)",
     "correction": null
   },
@@ -1891,7 +1891,7 @@
     "correct": [
       "d"
     ],
-    "explanation": "",
+    "explanation": "The Guide defines the Product Backlog as the single source of work for the Scrum Team, but does not specify its lifespan; the keyed answer is inferred from its role in improving the product.",
     "section": "Scrum Guide (US 2020): Scrum Artifacts (Seite 10-12)",
     "correction": {
       "kind": "Sprache",
@@ -2762,7 +2762,7 @@
     "correct": [
       "a"
     ],
-    "explanation": "",
+    "explanation": "If a Scrum Team becomes too large, the Guide says it may reorganize into multiple cohesive teams focused on the same product, sharing one Product Goal, Product Backlog, and Product Owner.",
     "section": "Scrum Guide (US 2020): Scrum Team (Seite 5-6)",
     "correction": {
       "kind": "Sprache",
@@ -2800,7 +2800,7 @@
     "correct": [
       "d"
     ],
-    "explanation": "",
+    "explanation": "The entire Scrum Team is accountable for creating a valuable, useful Increment each Sprint.",
     "section": "Scrum Guide (US 2020): Scrum Team (Seite 5-6)",
     "correction": null
   },
@@ -3413,7 +3413,7 @@
     "correct": [
       "a"
     ],
-    "explanation": "",
+    "explanation": "Scrum defines the Scrum Master, Product Owner, and Developers as accountabilities—not a separate Tester accountability. Testing work can still be done by Developers.",
     "section": "Scrum Guide (US 2020): Scrum Team (Seite 5-6)",
     "correction": null
   },
@@ -4212,7 +4212,7 @@
     "correct": [
       "c"
     ],
-    "explanation": "",
+    "explanation": "A Sprint has a consistent duration of one month or less.",
     "section": "Scrum Guide (US 2020): Scrum Events (Seite 7-10)",
     "correction": null
   },
@@ -4472,7 +4472,7 @@
     "correct": [
       "a"
     ],
-    "explanation": "",
+    "explanation": "The Guide assigns Product Backlog accountability to one Product Owner, not a committee. It does not require a different Product Owner for every product.",
     "section": "Scrum Guide (US 2020): Scrum Team (Seite 5-6)",
     "correction": null
   },
@@ -4567,7 +4567,7 @@
       "c",
       "d"
     ],
-    "explanation": "",
+    "explanation": "The Scrum Team consists of the Scrum Master, Product Owner, and Developers. Stakeholders collaborate with the team but are not one of its accountabilities.",
     "section": "Scrum Guide (US 2020): Scrum Team (Seite 5-6)",
     "correction": null
   },
@@ -5380,7 +5380,7 @@
     "correct": [
       "a"
     ],
-    "explanation": "",
+    "explanation": "The Sprint is the container for all other Scrum events.",
     "section": "Scrum Guide (US 2020): Scrum Events (Seite 7-10)",
     "correction": null
   },
@@ -6853,7 +6853,7 @@
     "correct": [
       "b"
     ],
-    "explanation": "",
+    "explanation": "The Product Owner collaborates with stakeholders and answers Developers' questions as needed; the Product Owner does not own the Sprint Backlog or Daily Scrum.",
     "section": "Scrum Guide (US 2020): Scrum Team (Seite 5-6)",
     "correction": null
   },
@@ -6953,7 +6953,7 @@
       "e",
       "f"
     ],
-    "explanation": "",
+    "explanation": "Evidence-Based Management identifies four Key Value Areas: Current Value, Unrealized Value, Time-to-Market, and Ability to Innovate. The keyed choices are three of these areas.",
     "section": "Der Leitfaden für Evidence-Based Management (2020)",
     "correction": null
   },
@@ -7227,7 +7227,7 @@
       "b",
       "c"
     ],
-    "explanation": "",
+    "explanation": "The Product Owner is accountable for optimizing value, ordering the Product Backlog, and ensuring it is transparent and understood.",
     "section": "Scrum Guide (US 2020): Scrum Team (Seite 5-6)",
     "correction": null
   },
@@ -7407,7 +7407,7 @@
     "correct": [
       "a"
     ],
-    "explanation": "",
+    "explanation": "Sprints are fixed in length and one month or less. Shorter Sprints can limit risk and provide an Increment sooner; the right duration balances these factors.",
     "section": "Scrum Guide (US 2020): Scrum Events (Seite 7-10)",
     "correction": null
   },
@@ -7505,7 +7505,7 @@
     "correct": [
       "c"
     ],
-    "explanation": "",
+    "explanation": "The Guide does not prescribe this exact return procedure. It does say unfinished work is not part of the Increment; reassessing and reordering the item is the closest listed option.",
     "section": "Scrum Guide (US 2020): Scrum Artifacts (Seite 10-12)",
     "correction": {
       "kind": "Sprache",
@@ -8738,7 +8738,7 @@
     "correct": [
       "a"
     ],
-    "explanation": "",
+    "explanation": "A timebox sets the maximum duration of an event; it does not specify when the event must start.",
     "section": "Scrum Guide (US 2020): Scrum Events (Seite 7-10)",
     "correction": null
   },
@@ -11497,7 +11497,7 @@
     "correct": [
       "a"
     ],
-    "explanation": "",
+    "explanation": "The Guide says the Sprint Goal creates coherence and focus, encouraging the Scrum Team to work together.",
     "section": "Scrum Guide (US 2020): Scrum Artifacts (Seite 10-12)",
     "correction": null
   },
@@ -12021,7 +12021,7 @@
       "b",
       "f"
     ],
-    "explanation": "",
+    "explanation": "These choices help a new team build shared context about the product, the Definition of Done, and each other's skills. The Guide does not require this exact onboarding sequence.",
     "section": "Scrum Guide (US 2020): Scrum Team (Seite 5-6)",
     "correction": {
       "kind": "Sprache",
@@ -12064,7 +12064,7 @@
     "correct": [
       "d"
     ],
-    "explanation": "",
+    "explanation": "The Developers who will do the work are responsible for sizing Product Backlog items; the Product Owner may clarify them and discuss trade-offs.",
     "section": "Scrum Guide (US 2020): Scrum Events (Seite 7-10)",
     "correction": null
   },
@@ -12801,7 +12801,7 @@
     "correct": [
       "b"
     ],
-    "explanation": "",
+    "explanation": "The Sprint Review is a working session to inspect the Increment and adapt the Product Backlog, not just a status report or showcase.",
     "section": "Scrum Guide (US 2020): Scrum Events (Seite 7-10)",
     "correction": null
   },
@@ -13973,7 +13973,7 @@
     "correct": [
       "a"
     ],
-    "explanation": "",
+    "explanation": "Only the Product Owner can cancel a Sprint, and only when the Sprint Goal becomes obsolete.",
     "section": "Scrum Guide (US 2020): Scrum Events (Seite 7-10)",
     "correction": null
   },
@@ -14196,7 +14196,7 @@
     "correct": [
       "b"
     ],
-    "explanation": "",
+    "explanation": "False: the Scrum Master serves the organization too, including by coaching, advising, and helping with Scrum adoption.",
     "section": "Scrum Guide (US 2020): Scrum Team (Seite 5-6)",
     "correction": null
   },
@@ -14471,7 +14471,7 @@
       "b",
       "e"
     ],
-    "explanation": "",
+    "explanation": "Self-management means deciding internally who does what, when, and how. The Guide supports that principle but does not state every listed option as a direct mechanism.",
     "section": "Scrum Guide (US 2020): Scrum Theory (Seite 3-4)",
     "correction": {
       "kind": "Sprache",
@@ -15005,7 +15005,7 @@
     "correct": [
       "b"
     ],
-    "explanation": "",
+    "explanation": "Product Backlog refinement is ongoing, so every item does not need full detail before the first Sprint; enough detail is prepared for near-term selection.",
     "section": "Scrum Guide (US 2020): Scrum Events (Seite 7-10)",
     "correction": null
   },
@@ -15300,7 +15300,7 @@
       "c",
       "d"
     ],
-    "explanation": "",
+    "explanation": "The Guide does not prescribe one value metric. Customer satisfaction and lower operational costs can be useful outcomes, depending on the product and context.",
     "section": "Scrum Guide (US 2020): Scrum Artifacts (Seite 10-12)",
     "correction": null
   },

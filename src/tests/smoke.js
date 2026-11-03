@@ -159,6 +159,13 @@ const OUT = shotsDir + "/app-";
   await page.screenshot({ path: OUT + tag + "-practice-dash.png", fullPage: true }); await ov("pdash");
   const saveHelpText = await page.locator("#pmain .save-help").innerText();
   if (!saveHelpText.includes("browser on this device") || !saveHelpText.includes("private browsing") || !saveHelpText.includes("Clearing browser data")) throw new Error("mock exam save help missing storage and data-loss guidance");
+  const guideSourceLink = await page.evaluate(() => {
+    const q = EXAM_QUESTIONS.find(question => question.id === "platform-54404736");
+    const node = document.createElement("div"); node.innerHTML = pquoteHtml(q);
+    const link = node.querySelector(".ref");
+    return link && { href: link.getAttribute("href"), target: link.target };
+  });
+  if (!guideSourceLink || guideSourceLink.href !== "#guide/sg-scrum-definition" || guideSourceLink.target !== "_blank") throw new Error("Scrum Guide source does not link to the cited section in a new tab");
   // exam
   if (await page.locator('#pmain [data-p^="exam-"]').count() !== 19) errs.push("EXAM SELECTOR COUNT is not 19");
   if (await page.locator("#pmain .exam-group").count() !== 3 || await page.locator("#pmain .exam-group[open]").count()) errs.push("PRACTICE COURSE GROUPS are not all folded by default");
