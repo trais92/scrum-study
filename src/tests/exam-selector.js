@@ -45,6 +45,7 @@ async function checkCardActions(page, root, stacked) {
     let home = await checkCardActions(page, "#v-home", true);
     assert.match(await home.mock.locator(".exam-action-detail").textContent(), /^Untimed · no countdown$/);
     await home.mock.click();
+    await page.waitForFunction(() => P?.mode === "exam" && P.label === "Scrum Course 1 · Exam 1");
     let started = await page.evaluate(() => ({ mode: P.mode, label: P.label, count: P.items.length, deadline: P.deadline }));
     assert.deepEqual(started, { mode: "exam", label: "Scrum Course 1 · Exam 1", count: 80, deadline: null },
       "homepage mock action should start the selected fixed exam without a timer when timing is off");
