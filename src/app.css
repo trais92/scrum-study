@@ -94,7 +94,7 @@ main.game { display: grid; grid-template-columns: minmax(360px, 470px) minmax(0,
 .exam-copy b { font-size: 13px; line-height: 1.2; }
 .exam-copy small { color: var(--muted); font-size: 11px; line-height: 1.25; }
 .exam-arrow { color: var(--accent-ink); font-size: 18px; line-height: 1; }
-.exam-bank { border-color: var(--ink); background: var(--ink); color: var(--panel); }
+.exam-bank { border-color: color-mix(in srgb, var(--accent) 48%, var(--line)); background: color-mix(in srgb, var(--accent-soft) 54%, var(--panel)); color: var(--ink); }
 .exam-bank .exam-number { background: var(--accent); }
 .exam-bank .exam-copy small { color: inherit; opacity: .74; }
 .exam-card-info.is-passed { color: var(--good); }
