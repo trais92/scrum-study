@@ -60,4 +60,4 @@ The state before the Delta setup is kept on the branch `pre-delta-2026-10-21`.
 
 The Scrum Guide 2020 © Ken Schwaber and Jeff Sutherland, offered under the [Creative Commons Attribution Share-Alike 4.0 licence](https://creativecommons.org/licenses/by-sa/4.0/). Original text: [scrumguides.org](https://scrumguides.org/). The German text is the official translation by the GermanScrumTranslators (version 3.5) and is unchanged. The explanations added to underlined terms are not part of the Scrum Guide.
 
-The original practice questions and the game are study material based on the Guide. They are not official Scrum.org exam questions. This adapted material is shared under the same CC BY-SA 4.0 licence. The six fixed exam sets in `data/exams.json` and the two imported question banks in `data/imported/` were supplied separately from learning-platform exports and are not part of that original question-bank licence statement.
+The original practice questions and the game are study material based on the Guide. They are not official Scrum.org exam questions. This adapted material is shared under the same CC BY-SA 4.0 licence.
